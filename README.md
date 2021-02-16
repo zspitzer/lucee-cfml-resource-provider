@@ -8,14 +8,13 @@ https://luceeserver.atlassian.net/browse/LDEV-2914
 
 as Lucee supports adding Resource Providers via extensions in CFML
 
-I.e. 
-`
-FileWrite("request://tempfile.png", imageObject );
+i.e. 
 
-FileWrite("session://tempfile.png", imageObject );
+`FileWrite("request://tempfile.png", imageObject );`
 
-FileWrite("application://tempfile.png", imageObject );
-`
+`FileWrite("session://tempfile.png", imageObject );`
+
+`FileWrite("application://tempfile.png", imageObject );`
 
 CFML based Virtual File System
 
