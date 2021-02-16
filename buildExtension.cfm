@@ -10,7 +10,7 @@
     dump(q);
 
     loop query=Q {
-        if (q.type eq "file" and q.name neq "buildExtension.cfm"){
+        if (q.type eq "file" and q.name neq "buildExtension.cfm" and q.directory does not contain ".git"){
             path = mid(q.directory, len(d));
             path = listchangeDelims(path,"/","\"); // make unix-y
             entry = "#path#/#q.name#";
