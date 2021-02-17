@@ -1,11 +1,7 @@
 Manifest-Version: 1.0
-id: "7b5a3ba8-be5a-436b-8ba5-3f9ba62bb54c"
+id: "9F946FED-09A7-4F15-A09C54C8C3B48FA1"
 version: "1.0.0.0"
 name: "ScopeResourceProvider"
 description: "Per scope file systems."
 category: "Resources"
-Resource:"[{ 
-    'component':'org.lucee.extension.cfml.scopeResourceProvider.requestProvider',
-    'scheme':'request',
-    'lock-timeout':'10000'
-}]"
+Resource: "[{ 'component':'org.lucee.extension.cfml.scopeResourceProvider.requestProvider','scheme':'request','lock-timeout':'10000'}]"
