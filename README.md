@@ -32,9 +32,9 @@ https://luceeserver.atlassian.net/browse/LDEV-672
 
 #### Bugs
 
-Building the extension on Windows doesn't work with cfzip due to a bug with paths
+The extension now installs, thanks @cfmitrah for pointing out the problem with the `MANIFEST.MF`
 
-https://luceeserver.atlassian.net/browse/LDEV-3285
+But it doesn't show up as a resource provider (yet) see `listResourceProviders.cfm`
 
 There are outstanding bugs relating to resources in Lucee
 https://luceeserver.atlassian.net/issues/?jql=labels%20%3D%20resources
