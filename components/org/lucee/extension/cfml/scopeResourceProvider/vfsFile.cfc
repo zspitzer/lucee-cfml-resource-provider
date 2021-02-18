@@ -25,15 +25,15 @@ component accessors=false {
         return "/" & listToArray(arguments._path,"/\").toList(separator);
     }
     
-    public any function onMissingMethod(string name, struct args){
-        
+    public any function onMissingMethod(string name, struct args={}){
+        var _args = structCount(arguments.args) == 0 ? "" : SerializeJson(arguments.args);
         if (isCustomFunction(this["_#arguments.name#"])){
             local.result = invoke(this, "_#arguments.name#", arguments.args);
             if (!isNull(local.result)){
-                writeLog(text="#path# #arguments.name#() #SerializeJson(arguments)# RETURNED: #SerializeJson(local.result)#");
+                writeLog(text="#path# #arguments.name#(#_args#) RETURNED: #SerializeJson(local.result)#");
                 return local.result;
             } else {
-                writeLog(text="#path# #arguments.name#() #SerializeJson(arguments)#");
+                writeLog(text="#path# #arguments.name#(#_args#)");
                 return;
             }
         } else {
@@ -130,8 +130,7 @@ component accessors=false {
     };
 
     function _setBinary(byteArray){
-        if (IsDir)
-            throw "_setBinary: can't write content to a dir";
+        //if (IsDir)             throw "_setBinary: can't write content to a dir";
         if (!exists)
             _createFile();
         binary = arguments.byteArray;
