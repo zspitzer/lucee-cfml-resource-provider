@@ -2,7 +2,8 @@ component /*implements="resource" */ accessors=true{
     property name="scheme" type="string" default="";
     public any function init(string scheme){
         writeLog(text="#SerializeJson(arguments)#");
-        var vfs =  new vfsFile(scheme, "/").setExists(true);
+        var vfs =  new vfsFile(scheme, "/");
+        vfs.setExists(true);
         this.files = {
             "/": vfs
         };

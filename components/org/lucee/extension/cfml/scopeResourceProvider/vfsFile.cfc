@@ -1,4 +1,4 @@
-component accessors=true {
+component accessors=false {
     property name="scheme" type="string" default="";
 	property name="path" type="string" default="";
     property name="name" type="string" default="";
@@ -11,14 +11,14 @@ component accessors=true {
     property name="separator" type="string" default="/";
 
     	    
-    public any function init(scheme, path, parent){
-        var _path = cleanPath(arguments.path);
+    public any function init(schemeName, filePath, parentFile){
+        var _path = cleanPath(arguments.filePath);
         writeLog(text="create #_path#");
-        setPath(_path);
-        setChildren({});
-        setScheme(arguments.scheme)
-        if (structKeyExists(arguments, "parent"))
-            setParent(parent);
+        path = _path;
+        children = {};
+        scheme = arguments.schemeName;
+        if (structKeyExists(arguments, "parentFile"))
+            parent = arguments.parentFile;
     }
 
     function cleanPath(string _path){
@@ -46,6 +46,8 @@ component accessors=true {
     }
 
     function _getName(){
+        if (name == "")
+            name = listLast(path,"/\");
         return name;
     }
 
@@ -84,6 +86,10 @@ component accessors=true {
         return true;
     };
 
+    void function _setExists(_exists){
+        exists = arguments._exists;
+    };
+
     function _getRealResource(String _realpath){
         var realPath = cleanPath(arguments._realpath);
         if (!structKeyExists(children, realPath)){
@@ -92,33 +98,42 @@ component accessors=true {
         return children[realPath];
     };
 
+    function _getParent(){
+        return parent.getPath();
+    };
+
     function _getParentResource(){
         return parent;
     };
 
     void function _createFile(boolean createParentWhenNotExists){
         // todo createParentWhenNotExists
-        setExists(true);
-        setIsDir(false);
-        setName(listLast(path,"/\"));
-        setLastModified(now());
+        exists = true;
+        IsDir = false;
+        name = listLast(path,"/\");
+        LastModified = now();
     };
 
     void function _remove(boolean force){
-        setExists(false);
-        setIsDir(false);
-        setBinary("");
-        setLastModified(now());
+        // todo recursive and actually remove!
+        exists = false;
+        IsDir = false;
+        Binary = "";
+        LastModified = now();
     };
 
     void function _createDirectory(boolean createParentWhenNotExists){
-        setIsDir(true);
-        setExists(true);
-        setName(listLast(path,"/\"));
-        setLastModified(now());
+        IsDir = true;
+        exists = true;
+        Name = listLast(path,"/\");
+        LastModified = now();
     };
 
     function _setBinary(byteArray){
+        if (IsDir)
+            throw "_setBinary: can't write content to a dir";
+        if (!exists)
+            _createFile();
         binary = arguments.byteArray;
     };
 

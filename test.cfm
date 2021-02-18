@@ -40,9 +40,7 @@
 
     f = getTempFile(d,"tmp");
     dump(var=f, label="getTempFile");
-    f = "#d##mid(f,2)#";
-
-    dump(var=f, label="getTempFile");
+    //f = "#d##mid(f,2)#";
 
     q = DirectoryList(path="request://",listinfo="query",recurse=true);
     dump(var=q, label="DirectoryList");
@@ -57,15 +55,17 @@
 
     c = FileRead(f);
     dump(var=c, label="fileRead #f#");
-
+    writelog("FileInfo");
     i = FileInfo(f);
     dump(var=i, label="FileInfo #f#");
-
+    writelog("getFileInfo");
     try {
     i = GetFileInfo(f);
     dump(var=i, label="getFileInfo #f#");
     } catch(e){
-        dump("ERROR: getFileInfo" & cfcatch.message);
+        dump("ERROR: getFileInfo (#f#)" & cfcatch.message);
+        dump(cfcatch);
+        abort;
     }
 
     q = DirectoryList(path="request://",listinfo="query",recurse=true);
@@ -76,5 +76,17 @@
 
     q = DirectoryList(path="request://",listinfo="query",recurse=true);
     dump(var=q, label="DirectoryList");
-    }
+    
+    d="request://";
+    srcImg = ImageNew("",1000,1000);
+    img = getTempFile(d,"tmp") & ".png";
+    dump(img);
+    dump("ImageWrite");
+    ImageWrite(srcImg, img);
+    q = DirectoryList(path="request://",listinfo="query",recurse=true);
+    dump(var=q, label="DirectoryList");
+    
+    dump(imageInfo(img));
+    dump(imageRead(img));
+}
 </cfscript>

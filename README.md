@@ -52,8 +52,6 @@ turns out cfml extension resource providers don't get installed (yet) https://lu
 
 There are outstanding bugs relating to resources in Lucee https://luceeserver.atlassian.net/issues/?jql=labels%20%3D%20resources
 
-`getFileInfo()` doesn't work with resources, but `fileInfo()` does?
-
 `DirectoryList("request://");` has a stray / character ?
 
 ### Status
