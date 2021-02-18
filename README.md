@@ -2,9 +2,9 @@
 
 This is an experiment to see if I could implement the follow feature request via a cfml extension
 
-inspired by add session and request based ram drives https://luceeserver.atlassian.net/browse/LDEV-2914
+Inspired by add session and request based ram drives https://luceeserver.atlassian.net/browse/LDEV-2914
 
-which I first proposed in 2009! https://www.bennadel.com/blog/1650-learning-coldfusion-9-the-virtual-file-system-ram-disk.htm#comments_19299
+Which I first proposed way back in 2009! https://www.bennadel.com/blog/1650-learning-coldfusion-9-the-virtual-file-system-ram-disk.htm#comments_19299
 
 as Lucee supports adding Resource Providers via extensions in CFML
 
@@ -62,7 +62,7 @@ At the moment, I am using `onMissingMethod` to see just which methods need to be
 
 All the resource provider calls are logged out to `application.log` for debugging (**some methods are called twice???**)
 
-You need to restart lucee if you make any changes to the installed files under `\lucee-server\context\components\org\lucee\extension\cfml\scopeResourceProvider` rather than rebuilding and uploading a .lex file
+You need to restart lucee if you make any changes to the installed files under `\lucee-server\context\components\org\lucee\extension\cfml\scopeResourceProvider` rather than rebuilding and uploading a .lex file each time
 
 ### Todo
 
@@ -70,6 +70,7 @@ You need to restart lucee if you make any changes to the installed files under `
 - creating parent directories when they don't exist (see previous)
 - delete should remove, not just mark as not existing
 - delete needs to check for children when not recursive (unless force?)
+- move test.cfm over to testbox. add benchmarking against the different existing VFS 
 
 ### See also
 
