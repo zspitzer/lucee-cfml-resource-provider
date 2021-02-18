@@ -41,8 +41,12 @@ component accessors=true {
         }
     }
 
-    function getPath(){
+    function _getPath(){
         return scheme & ":/" & path;
+    }
+
+    function _getName(){
+        return name;
     }
 
     function _getResource(String realPath){
