@@ -30,6 +30,10 @@ Mapping this to the file system would interesting too, but ideally,  it would au
 There is an old proposal *Add Hooks for Java Event Listeners* which could be useful here
 https://luceeserver.atlassian.net/browse/LDEV-672
 
+This could also be adapted/extended to do some interesting stuff like automatically creating resized version of images on save or other workflows
+
+**PRs are very welcome!**
+
 ### Build
 
 Using commandbox, Run `box buildExtension.cfm` to build a .lex file, then manually upload via the admin
@@ -75,3 +79,4 @@ You need to restart lucee if you make any changes to the installed files under `
 ### See also
 
 https://github.com/paulklinkenberg/lucee-azure-provider
+https://markdrew.io/fun-with-mappings-and-resources-part-3-db-resources
