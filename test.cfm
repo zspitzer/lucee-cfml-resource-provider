@@ -79,14 +79,17 @@
     
     d="request://";
     srcImg = ImageNew("",1000,1000);
+    writeLog("getTempFile");
     img = getTempFile(d,"tmp") & ".png";
     dump(img);
-    dump("ImageWrite");
+    writeLog("ImageWrite");
     ImageWrite(srcImg, img);
+    writeLog("DirectoryList");
     q = DirectoryList(path="request://",listinfo="query",recurse=true);
     dump(var=q, label="DirectoryList");
-    
+    writelog("imageInfo");
     dump(imageInfo(img));
+    writelog("imageRead");
     dump(imageRead(img));
 }
 </cfscript>
