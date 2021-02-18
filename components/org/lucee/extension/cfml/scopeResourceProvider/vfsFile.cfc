@@ -1,4 +1,5 @@
 component accessors=true {
+    property name="scheme" type="string" default="";
 	property name="path" type="string" default="";
     property name="name" type="string" default="";
     property name="isDir" type="boolean" default="true";
@@ -7,18 +8,21 @@ component accessors=true {
     property name="parent" type="any";
     property name="LastModified" type="date";    
     property name="binary" type="any" default="";
+    property name="separator" type="string" default="/";
+
     	    
-    public any function init(path, parent){
+    public any function init(scheme, path, parent){
         var _path = cleanPath(arguments.path);
         writeLog(text="create #_path#");
         setPath(_path);
         setChildren({});
+        setScheme(arguments.scheme)
         if (structKeyExists(arguments, "parent"))
             setParent(parent);
     }
 
     function cleanPath(string _path){
-        return "/" & listToArray(arguments._path,"/\").toList("/");
+        return "/" & listToArray(arguments._path,"/\").toList(separator);
     }
     
     public any function onMissingMethod(string name, struct args){
@@ -35,6 +39,10 @@ component accessors=true {
         } else {
             throw "#arguments.name# not implemented";
         }
+    }
+
+    function getPath(){
+        return scheme & ":/" & path;
     }
 
     function _getResource(String realPath){
@@ -74,8 +82,9 @@ component accessors=true {
 
     function _getRealResource(String _realpath){
         var realPath = cleanPath(arguments._realpath);
-        if (!structKeyExists(children, realPath))
-            children[realPath] = new vfsFile(realPath, this);
+        if (!structKeyExists(children, realPath)){
+            children[realPath] = new vfsFile(scheme, realPath, this);
+        }
         return children[realPath];
     };
 

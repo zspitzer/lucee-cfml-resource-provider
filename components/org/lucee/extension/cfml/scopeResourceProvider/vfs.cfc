@@ -1,8 +1,10 @@
-component /*implements="resource" */{
-    public any function init(){
+component /*implements="resource" */ accessors=true{
+    property name="scheme" type="string" default="";
+    public any function init(string scheme){
         writeLog(text="#SerializeJson(arguments)#");
+        var vfs =  new vfsFile(scheme, "/").setExists(true);
         this.files = {
-            "/": new vfsFile("/").setExists(true)
+            "/": vfs
         };
         return this;
     }

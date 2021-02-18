@@ -1,8 +1,9 @@
 component /*implements="resourceProvider" */{
+
     public any function init(string scheme, struct args){
         variables.scheme = arguments.scheme;
         variables.args = arguments.args;
-        variables.vfs = new vfs();
+        variables.vfs = new vfs(scheme);
         writeLog(text="init: #SerializeJson(arguments)#");
         return this;
     }
