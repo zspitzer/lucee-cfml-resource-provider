@@ -1,4 +1,5 @@
 <cfscript>
+    param name="scheme" default="request";
     /*
     pc = getPageContext();
 
@@ -19,20 +20,20 @@
 
     dump(var=getVFSMetaData("request"), label="getVFSMetaData");
 
-    q = DirectoryList("request://");
+    q = DirectoryList("#scheme#://");
     dump(var=q, label="DirectoryList");
 
-    nested="request://nested/is/in/berlin";
+    nested="#scheme#://nested/is/in/berlin";
 
     writeLog("-----------------------DirectoryCreate");
     dump("DirectoryCreate #nested# (nested)");
     if (!DirectoryExists(nested))
         DirectoryCreate(nested, true);
 
-    q = DirectoryList(path="request://",listinfo="query",recurse=true);
+    q = DirectoryList(path="#scheme#://",listinfo="query",recurse=true);
     dump(var=q, label="DirectoryList (nested)");
 
-    d = "request://Zac";
+    d = "#scheme#://Zac";
 
     writeLog("-----------------------DirectoryCreate");
     dump("DirectoryCreate #d#");
@@ -40,25 +41,25 @@
         DirectoryCreate(d);
 
 
-    q = DirectoryList(path="request://",listinfo="query",recurse=false);
+    q = DirectoryList(path="#scheme#://",listinfo="query",recurse=false);
     dump(var=q, label="DirectoryList (top level, no recurse)");
 
     writeLog("-----------------------DirectoryDelete");
     dump("DirectoryDelete #d#");
     DirectoryDelete(d);
 
-    q = DirectoryList(path="request://",listinfo="query",recurse=true);
+    q = DirectoryList(path="#scheme#://",listinfo="query",recurse=true);
     dump(var=q, label="DirectoryList");
 
-    nest="request://nested";
+    nest="#scheme#://nested";
     writeLog("-----------------------DirectoryDelete");
     dump("DirectoryDelete #nest#");
     DirectoryDelete(nest, true);
 
-    q = DirectoryList(path="request://",listinfo="query",recurse=true);
+    q = DirectoryList(path="#scheme#://",listinfo="query",recurse=true);
     dump(var=q, label="DirectoryList (nested delete)");
 
-    d="request://";
+    d="#scheme#://";
 
     writeLog("--------------------getTempFile");
     f = getTempFile(d,"tmp");
@@ -67,7 +68,7 @@
     //f = "#d##mid(f,2)#";
 
     writeLog("-----------------------DirectoryList");
-    q = DirectoryList(path="request://",listinfo="query",recurse=true);
+    q = DirectoryList(path="#scheme#://",listinfo="query",recurse=true);
     dump(var=q, label="DirectoryList");
 
 
@@ -100,17 +101,17 @@
         abort;
     }
 
-    q = DirectoryList(path="request://",listinfo="query",recurse=true);
+    q = DirectoryList(path="#scheme#://",listinfo="query",recurse=true);
     dump(var=q, label="DirectoryList");
 
     writeLog("-----------------------FileDelete");
     dump("fileDelete #f#");
     FileDelete(f);
 
-    q = DirectoryList(path="request://",listinfo="query",recurse=true);
+    q = DirectoryList(path="#scheme#://",listinfo="query",recurse=true);
     dump(var=q, label="DirectoryList");
 
-    d="request://";
+    d="#scheme#://";
     srcImg = ImageNew("",10,10);
     writeLog("-----------------------getTempFile");
     img = getTempFile(d,"tmp") & ".png";
@@ -121,7 +122,7 @@
         throw "ImageWrite created no file?";
 
     writeLog("-----------------------DirectoryList");
-    q = DirectoryList(path="request://",listinfo="query",recurse=true);
+    q = DirectoryList(path="#scheme#://",listinfo="query",recurse=true);
     dump(var=q, label="DirectoryList");
     writelog("imageInfo");
     dump(var=imageInfo(img), expand=false, label="imageInfo");
@@ -129,7 +130,7 @@
     dump(var=imageRead(img), expand=false, label="imageRead");
 
 
-    d ="request://dirs";
+    d ="#scheme#://dirs";
     if (!DirectoryExists(d))
         DirectoryCreate(d);
     FileWrite(d & "/zero.txt","zero");
@@ -142,11 +143,18 @@
     }
 
     writeLog("-----------------------DirectoryList");
-    q = DirectoryList(path="request://dirs",listinfo="query",recurse=false);
+    q = DirectoryList(path="#scheme#://dirs",listinfo="query",recurse=false);
     dump(var=q, label="DirectoryList");
 
     writeLog("-----------------------DirectoryList recurse");
-    q = DirectoryList(path="request://dirs",listinfo="query",recurse=true);
+    q = DirectoryList(path="#scheme#://dirs",listinfo="query",recurse=true);
     dump(var=q, label="DirectoryList");
+
+    writeLog("-----------------------DirectoryCopy recurse");
+    copyDest ="#scheme#://copy";
+    DirectoryCopy( source=d, destination=copyDest, recurse=true, createPath=true );
+
+    q = DirectoryList(path="#scheme#://",listinfo="query",recurse=true);
+    dump(var=q, label="DirectoryList - all");
 }
 </cfscript>

@@ -1,12 +1,15 @@
 component {
     public any function init(string scheme){
+        variables.debug = false;
+
         this.scheme = arguments.scheme;
         this.storage = {};
         return this;
     }
 
     public any function onMissingMethod(string name, struct args){
-        writeLog(text="VFSstorage #SerializeJson(arguments)#");
+        if (variables.debug)
+            writeLog(text="VFSstorage #SerializeJson(arguments)#");
         if (isCustomFunction(this["_#arguments.name#"]))
             return invoke(this, "_#arguments.name#", arguments.args);
         else
@@ -14,7 +17,8 @@ component {
     }
 
     function _add(String path, any file, boolean dir){
-        writeLog(text="VFSstorage ADD #path#");
+        if (variables.debug)
+            writeLog(text="VFSstorage ADD #path#");
         this.storage[arguments.path] = arguments.file;
         return;
     };
@@ -24,7 +28,6 @@ component {
 
     function _read(String path, any file){
         if (!_exists(path)){
-            writeLog("THROW");
             throw "#path# doesn't exist";
         } else {
             return this.storage[arguments.path];
