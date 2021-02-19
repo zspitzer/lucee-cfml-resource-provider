@@ -58,17 +58,21 @@ There are outstanding bugs relating to resources in Lucee https://luceeserver.at
 
 Currently up and running, now in a BETA state, see `test.cfm`. 
 
-You can benchmark against the built in `ram://` VFS drive by calling `test.cfm?scheme=ram`
-
-**this cfml resource provider is actually faster, despite the `onMissingMethod` overhead with debug logging disabled**
-
 It's not currently doing anything with scopes, it's just a single static scope like the `ram://` resources, but in cfml!
 
-At the moment, I am using `onMissingMethod` to see just which methods need to be supported for a bare bones resource provider
+You need to restart lucee if you make any changes to the installed files under `\lucee-server\context\components\org\lucee\extension\cfml\scopeResourceProvider` rather than rebuilding and uploading a .lex file each time.
+
+### Performance
+
+You can benchmark against the built in `ram://` VFS drive by calling `test.cfm?scheme=ram`
+
+this cfml resource provider is **quite close in performance to the built in ram drive**. 
+
+Ram drives return more metadata to DirectoryList to that makes the `test.cfm` slower, you can disable the dumps in `test.cfm`
+
+At the moment, I am using `onMissingMethod` to see just which methods need to be supported for a bare bones resource provider, which is lots of overhead
 
 All the resource provider calls are logged out to `application.log` for debugging, there is a `variables.debug=boolean` in the various cfcs
-
-You need to restart lucee if you make any changes to the installed files under `\lucee-server\context\components\org\lucee\extension\cfml\scopeResourceProvider` rather than rebuilding and uploading a .lex file each time.
 
 ### Todo
 
