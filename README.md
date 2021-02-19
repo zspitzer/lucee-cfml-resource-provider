@@ -66,9 +66,9 @@ You need to restart lucee if you make any changes to the installed files under `
 
 You can benchmark against the built in `ram://` VFS drive by calling `test.cfm?scheme=ram`
 
-this cfml resource provider is **quite close in performance to the built in ram drive**. 
+This cfml resource provider is **quite close in performance to the built in ram drive**. 
 
-Ram drives return more metadata to DirectoryList to that makes the `test.cfm` slower, you can disable the dumps in `test.cfm`
+Ram drives return more metadata to `DirectoryList` which makes the `test.cfm` run slower, you can disable the dumps in `test.cfm`
 
 At the moment, I am using `onMissingMethod` to see just which methods need to be supported for a bare bones resource provider, which is lots of overhead
 
