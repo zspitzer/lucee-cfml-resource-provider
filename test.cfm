@@ -22,22 +22,41 @@
     q = DirectoryList("request://");
     dump(var=q, label="DirectoryList");
 
-    d="request://Zac";
+    nested="request://nested/is/in/berlin";
 
     writeLog("-----------------------DirectoryCreate");
-    dump("DirectoryCreate");
+    dump("DirectoryCreate #nested# (nested)");
+    if (!DirectoryExists(nested))
+        DirectoryCreate(nested, true);
+
+    q = DirectoryList(path="request://",listinfo="query",recurse=true);
+    dump(var=q, label="DirectoryList (nested)");
+
+    d = "request://Zac";
+
+    writeLog("-----------------------DirectoryCreate");
+    dump("DirectoryCreate #d#");
     if (!DirectoryExists(d))
         DirectoryCreate(d);
 
-    q = DirectoryList(path="request://",listinfo="query",recurse=true);
-    dump(var=q, label="DirectoryList");
+
+    q = DirectoryList(path="request://",listinfo="query",recurse=false);
+    dump(var=q, label="DirectoryList (top level, no recurse)");
 
     writeLog("-----------------------DirectoryDelete");
-    dump("DirectoryDelete");
+    dump("DirectoryDelete #d#");
     DirectoryDelete(d);
 
     q = DirectoryList(path="request://",listinfo="query",recurse=true);
     dump(var=q, label="DirectoryList");
+
+    nest="request://nested";
+    writeLog("-----------------------DirectoryDelete");
+    dump("DirectoryDelete #nest#");
+    DirectoryDelete(nest, true);
+
+    q = DirectoryList(path="request://",listinfo="query",recurse=true);
+    dump(var=q, label="DirectoryList (nested delete)");
 
     d="request://";
 

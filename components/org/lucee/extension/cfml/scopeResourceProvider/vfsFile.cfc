@@ -29,6 +29,7 @@ component accessors=false {
                 return;
             }
         } else {
+            writeLog("THROW");
             throw "#arguments.name# not implemented";
         }
     }
@@ -112,11 +113,11 @@ component accessors=false {
         variables.provider._createFile(this, createParentWhenNotExists);
     };
 
-    void function _remove(boolean force){
+    function _remove(boolean force){
         variables.provider._remove(this, force);
     };
 
-    void function _createDirectory(boolean createParentWhenNotExists){
+    function _createDirectory(boolean createParentWhenNotExists){
         variables.provider._createDirectory(this, createParentWhenNotExists);
     };
 

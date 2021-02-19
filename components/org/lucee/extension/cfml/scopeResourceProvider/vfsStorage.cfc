@@ -23,10 +23,12 @@ component {
     };
 
     function _read(String path, any file){
-        if (!_exists(path))
+        if (!_exists(path)){
+            writeLog("THROW");
             throw "#path# doesn't exist";
-        else
+        } else {
             return this.storage[arguments.path];
+        }
     };
 
     public boolean function _exists(path){

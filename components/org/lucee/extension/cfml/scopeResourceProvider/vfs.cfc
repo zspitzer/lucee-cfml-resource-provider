@@ -1,23 +1,24 @@
-component /*implements="resource" */ accessors=true {
+component /*implements="resource"  accessors=true */ {
+    property name="files" type="struct";
+
     public any function init(string scheme){
         writeLog(text="#SerializeJson(arguments)#");
         this.storage = new vfsStorage(scheme);
         this.scheme = arguments.scheme;
         this.separator = "/";
+        this.files = {};
         var vfs =  new vfsFile(this.scheme, this, this.separator);
-        vfs._createDirectory(false);
-        this.files = {
-            "#this.separator#": vfs
-        };
+        vfs._createDirectory(true);
         return this;
     }
 
     public any function onMissingMethod(string name, struct args){
         writeLog(text="------------------VFS #SerializeJson(arguments)#");
-        if (isCustomFunction(this["_#arguments.name#"]))
+        if (isCustomFunction(this["_#arguments.name#"])){
             return invoke(this, "_#arguments.name#", arguments.args);
-        else
+        } else {
             throw "#arguments.name# not implemented";
+        }
     }
 
     function _getResource(String path){
@@ -26,7 +27,6 @@ component /*implements="resource" */ accessors=true {
         if (structKeyExists(this.files, _path)){
             writeLog(text="VFS _getResource #_path#");
             return this.files[_path];
-
         }
         writeLog(text="VFS _getResource DUMMY #_path#");
         return new vfsFile(this.scheme, this, _path);
@@ -52,33 +52,24 @@ component /*implements="resource" */ accessors=true {
     function _createFile(any resource, boolean createParentWhenNotExists){
         local.parent = _getParentResource(resource, true);
         if (!local.parent.exists){
-            if (arguments.createParentWhenNotExists)
+            if (arguments.createParentWhenNotExists){
                 _createDirectory(local.parent, true);
-            else
+            } else {
                 throw "Cannot create file, parent directory [#local.parent.path#] doesn't exist";
+            }
         }
-
-        writeLog(text="_createFile A");
         resource.exists = true;
         resource.IsDir = false;
         resource.name = listLast(resource.path,"/\");
         resource.LastModified = now();
         this.files[resource.path] = resource;
-        writeLog(text="_createFile B");
     };
 
+    function getFiles(){
+        return this.files;
+    }
+
     function _createDirectory(any resource, boolean createParentWhenNotExists){
-        // need to add to children...
-        // todo createParentWhenNotExists
-
-        /* URRRGGGHHH this next line throws Component [vfs] has no accessible Member with name [FILES]
-        // local.parent =_getParentResource(resource, true);
-
-        but _createDirectoryEntry works and can access this.files???
-
-        */
-
-        /*
         local.parent = _getParentResource(resource, true);
         if (!local.parent.exists){
             if (arguments.createParentWhenNotExists)
@@ -86,24 +77,29 @@ component /*implements="resource" */ accessors=true {
             else
                 throw "Cannot create directory, parent directory [#local.parent.path#] doesn't exist";
         }
-        */
-
         _createDirectoryEntry(resource);
-        /*
-        resource.IsDir = true;
-        resource.exists = true;
-        resource.name = listLast(resource.path,"/\");
-        resource.LastModified = now();
-        this.files[resource.path] = resource;
-        */
         return;
     };
 
     function _createDirectoryPath(any resource){
-        writeLog(text="implemeted _createDirectoryPath");
+        // special case, creating the root folder
+        if (resource.path eq this.separator){
+            _createDirectoryEntry(resource);
+            return;
+        }
+        var _path = listToArray(resource.path, this.separator);
+        var newpath = [];
+        for (var f = 1; f lte arrayLen(_path); f++){
+            ArrayAppend(newpath, _path[f]);
+            var folder = this.separator & ArrayToList(newPath, this.separator);
+            if (!structKeyExists(this.files, folder)){
+                _createDirectoryEntry(_getResource(folder));
+            }
+        }
     }
 
     function _createDirectoryEntry(any resource){
+        writeLog("_createDirectoryEntry:  [#resource.path#]");
         resource.IsDir = true;
         resource.exists = true;
         resource.name = listLast(resource.path,"/\");
@@ -116,10 +112,12 @@ component /*implements="resource" */ accessors=true {
         // todo recursive, check childern
         var children = _listResources(resource, true);
         if (arrayLen(children) gt 0){
-            if (!arguments.force)
+            if (!arguments.force){
+                writeLog("THROW");
                 throw "Cannot Delete, child resources found";
+            }
             // recursive delete
-            loop array="#children#" index="local.i" item="#local.file#" {
+            loop array="#children#" index="local.file" {
                 _removeEntry(local.file);
             }
         }
@@ -140,8 +138,8 @@ component /*implements="resource" */ accessors=true {
         loop collection="#this.files#" index="local.index" item="local.file"{
             local._fileParentPath = mid(local.file.path, 1, local._len);
 
-            writeLog(text="depth #local.file.depth# == #local._depth#");
-            writeLog(text="path #local.file.path# == #local._path# [#local._fileParentPath#]");
+           // writeLog(text="depth #local.file.depth# == #local._depth#");
+           // writeLog(text="path #local.file.path# == #local._path# [#local._fileParentPath#]");
 
             if (local.file.path neq local._path // ignore itself!
                     && local._fileParentPath eq local._path){
