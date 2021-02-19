@@ -68,10 +68,8 @@ You need to restart lucee if you make any changes to the installed files under `
 
 ### Todo
 
-- folders need to be stored as children of the `VFSfile`
-- creating parent directories when they don't exist (see previous)
-- delete should remove, not just mark as not existing
-- delete needs to check for children when not recursive (unless force?)
+- more testing
+- add in scope support
 - move test.cfm over to testbox. add benchmarking against the different existing VFS 
 
 ### See also
