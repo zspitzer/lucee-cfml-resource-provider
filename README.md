@@ -56,7 +56,11 @@ There are outstanding bugs relating to resources in Lucee https://luceeserver.at
 
 ### Status
 
-Currently up and limping, but very **alpha** still, see `test.cfm`. It's kinda slow (but there's lots of debugging logging overhead)
+Currently up and running, now in a BETA state, see `test.cfm`. 
+
+You can benchmark against the built in `ram://` VFS drive by calling `test.cfm?scheme=ram`
+
+** this cfml resource provider is actually faster, despite the `onMissingMethod` overhead with debug logging disabled **
 
 It's not currently doing anything with scopes, it's just a single static scope like the `ram://` resources, but in cfml!
 
