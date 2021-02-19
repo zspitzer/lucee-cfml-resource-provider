@@ -1,39 +1,31 @@
 component accessors=false {
-    property name="scheme" type="string" default="";
-	property name="path" type="string" default="";
-    property name="name" type="string" default="";
-    property name="isDir" type="boolean" default="true";
-    property name="children" type="struct";
-    property name="exists" type="boolean" default="false";
-    property name="parent" type="any";
-    property name="LastModified" type="date";    
-    property name="binary" type="any" default="";
-    property name="separator" type="string" default="/";
-
-    	    
-    public any function init(schemeName, filePath, parentFile){
-        var _path = cleanPath(arguments.filePath);
-        writeLog(text="create #_path#");
-        path = _path;
-        children = {};
-        scheme = arguments.schemeName;
-        if (structKeyExists(arguments, "parentFile"))
-            parent = arguments.parentFile;
+    public any function init(schemeName, provider, filePath){
+        writeLog(text="create #arguments.filePath#");
+        this.separator = "/";
+        this.scheme= arguments.schemeName;
+        this.path = arguments.filePath;
+        this.depth = listLen(this.path, this.separator)-1;
+        if (this.depth < 0)
+            this.depth = 0;
+        this.name = listLast(this.path, this.separator);
+        this.isDir = false;
+        this.exists = false;
+        // this.parent = "";
+        this.lastModified = "";
+        this.length = 0;
+        variables.provider = arguments.provider;
     }
 
-    function cleanPath(string _path){
-        return "/" & listToArray(arguments._path,"/\").toList(separator);
-    }
-    
     public any function onMissingMethod(string name, struct args={}){
         var _args = structCount(arguments.args) == 0 ? "" : SerializeJson(arguments.args);
         if (isCustomFunction(this["_#arguments.name#"])){
+            writeLog(text="CALLING #this.path# #arguments.name#(#_args#)");
             local.result = invoke(this, "_#arguments.name#", arguments.args);
             if (!isNull(local.result)){
-                writeLog(text="#path# #arguments.name#(#_args#) RETURNED: #SerializeJson(local.result)#");
+                writeLog(text="#this.path# #arguments.name#(#_args#) RETURNED: #SerializeJson(local.result)#");
                 return local.result;
             } else {
-                writeLog(text="#path# #arguments.name#(#_args#)");
+                writeLog(text="#this.path# #arguments.name#(#_args#)");
                 return;
             }
         } else {
@@ -42,28 +34,39 @@ component accessors=false {
     }
 
     function _getPath(){
-        return scheme & ":/" & path;
+        return this.scheme & ":/" & this.path;
     }
 
     function _getName(){
-        if (name == "")
-            name = listLast(path,"/\");
-        return name;
+        return this.name;
     }
-
-    function _getResource(String realPath){
-        //writeLog(text="#arguments.realpath# _getResource()");
-        return this.files[arguments.realpath];
-    };  
 
     public boolean function _exists(){
         //writeLog(text="#path# exists() #exists#");
-        return exists;
-    };  
+        return this.exists;
+    };
 
     public boolean function _length(){
-        return len(binary);
-    };  
+        return this.length;
+    };
+
+    function _setBinary(byteArray){
+        //if (IsDir)             throw "_setBinary: can't write content to a dir";
+        if (!this.exists)
+            _createFile(false);
+        variables.provider.storage._add(this.path, arguments.byteArray);
+        this.length = len(arguments.byteArray)
+        return this.length;
+    };
+
+    function _getBinary(){
+        var file = variables.provider.storage._read(this.path);
+        return file;
+    };
+
+    function _LastModified(){
+        return this.LastModified;
+    };
 
     public boolean function _isAbsolute(){
         return true;
@@ -71,87 +74,62 @@ component accessors=false {
 
     public boolean function _isDirectory(){
         //writeLog(text="#path# isDirectory() #isdir#");
-        return exists && isDir;
+        return this.isDir;
     };
 
 	public boolean function _isFile(){
-        return exists && !isDir;
+        return !this.isDir;
     };
 
     public boolean function _isReadable(){
         return true;
     };
-	
+
 	public boolean function _isWriteable(){
         return true;
     };
 
     void function _setExists(_exists){
-        exists = arguments._exists;
+        this.exists = arguments._exists;
     };
 
-    function _getRealResource(String _realpath){
-        var realPath = cleanPath(arguments._realpath);
-        if (!structKeyExists(children, realPath)){
-            children[realPath] = new vfsFile(scheme, realPath, this);
-        }
-        return children[realPath];
+    function _getRealResource(String _path){
+        if (this.exists)
+            return variables.provider._getRealResource(this, _path);
+        else
+            return;
     };
 
     function _getParent(){
-        return parent.getPath();
+        variables.provider._getParent(this);
     };
 
     function _getParentResource(){
-        return parent;
+        variables.provider._getParentResource(this);
     };
 
-    void function _createFile(boolean createParentWhenNotExists){
-        // todo createParentWhenNotExists
-        exists = true;
-        IsDir = false;
-        name = listLast(path,"/\");
-        LastModified = now();
+    function _createFile(boolean createParentWhenNotExists){
+        variables.provider._createFile(this, createParentWhenNotExists);
     };
 
     void function _remove(boolean force){
-        // todo recursive and actually remove!
-        exists = false;
-        IsDir = false;
-        Binary = "";
-        LastModified = now();
+        variables.provider._remove(this, force);
     };
 
     void function _createDirectory(boolean createParentWhenNotExists){
-        IsDir = true;
-        exists = true;
-        Name = listLast(path,"/\");
-        LastModified = now();
+        variables.provider._createDirectory(this, createParentWhenNotExists);
     };
-
-    function _setBinary(byteArray){
-        //if (IsDir)             throw "_setBinary: can't write content to a dir";
-        if (!exists)
-            _createFile();
-        binary = arguments.byteArray;
-    };
-
-    function _getBinary(){
-        return binary;
-    };
-
-    function _LastModified(){
-        return LastModified;
-    }
 
     function _listResources(){
-        writeLog(text="#path# listResources [#structKeyList(children)#]");
-        local.files = [];
-        loop collection="#children#" index="local.index" item="local.item"{
-            if (local.item.exists())
-                arrayAppend(local.files, local.item);
-        }
-        return local.files;
+        return variables.provider._listResources(this);
     };
 
+    function set(prop, val){
+        return this[prop] = val;
+    }
+
+    function get(prop){
+        writeLog(text="#structKeyList(this)#");
+        return this[prop];
+    }
 }
