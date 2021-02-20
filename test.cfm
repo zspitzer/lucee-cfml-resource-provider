@@ -1,5 +1,30 @@
 <cfscript>
+    /*
+    x= new org.lucee.extension.cfml.scopeResourceProvider.vfsFile('zac', {},"/");
+
+
+    loop collection="#x#" key="local.key" value="local.value" {
+        if (structKeyExists(x, local.key) && !isCustomFunction(local.value)){
+            //this[local.key] = arguments.comp[local.key];
+            echo("prop: #local.key# = #local.value#");
+        }
+    }
+    abort;
+
+    dump(x);
+    dump(getMetaData(x));
+    dump(getComponentMetaData(x));
+
+    abort;
+*/
+
     param name="scheme" default="request";
+    param name="dump" default="true";
+
+    if (scheme== "")
+        scheme="request";
+
+    dumpEnabled = dump;
     /*
     pc = getPageContext();
 
@@ -17,7 +42,8 @@
 
     function doDump(){
         //return; // ram drives return more meta data so dumps are slower, comment out to compare
-        dump(argumentCollection=arguments);
+        if (dumpEnabled)
+            dump(argumentCollection=arguments);
     }
 
     setting requesttimeout=5;
@@ -162,5 +188,22 @@
 
     q = DirectoryList(path="#scheme#://",listinfo="query",recurse=true);
     doDump(var=q, label="DirectoryList - all");
+
+    purge ="#scheme#://";
+    writeLog("-----------------------DirectoryDelete ALL");
+    doDump(var="DirectoryDelete #purge# ALL");
+    try {
+        DirectoryDelete(purge, false);
+    } catch (e){
+        dump("EXPECTED ERROR:" & cfcatch.message);
+    }
+
+    DirectoryDelete(purge, true);
+
+    writeLog("-----------------------DirectoryList recurse (should be empty)");
+    q = DirectoryList(path=purge,listinfo="query",recurse=true);
+    doDump(var=q, label="DirectoryList (should be empty)");
+    if (q.recordcount gt 0)
+        throw "DirectoryList (should be empty)"
 }
 </cfscript>

@@ -1,30 +1,19 @@
-component {
+component extends="vfsBase" {
     public any function init(string scheme, string separator){
-        variables.debug = false;
         this.separator = "/";
         this.scheme = arguments.scheme;
         this.storage = {};
         return this;
     }
 
-    public any function onMissingMethod(string name, struct args){
-        if (variables.debug)
-            writeLog(text="VFSstorage #arguments.name#(#SerializeJson(args)#)");
-        if (isCustomFunction(this["_#arguments.name#"]))
-            return invoke(this, "_#arguments.name#", arguments.args);
-        else
-            throw "#arguments.name# not implemented";
-    }
+    function add(any resource){
+        logger(text="VFSstorage ADD #arguments.resource.path#");
 
-    function _add(any resource){
-        if (variables.debug)
-            writeLog(text="VFSstorage ADD #arguments.resource.path#");
-
-        resource.exists = true;
+        resource.setExists(true);
         resource.name = listLast(resource.path,"/\");
-        resource.LastModified = now();
+        resource.setLastModified();
 
-        //writeLog("_add:  [#resource.path# dir:#resource.isDir# exists:#resource.exists#]");
+        logger("vfsStorage add:  [#resource.path# dir:#resource.isDir# exists:#resource.exists()#]");
 
         this.storage[arguments.resource.path] = {
             resource: arguments.resource
@@ -32,40 +21,41 @@ component {
         return;
     }
 
-    function _update(any resource, any file){
-        if (variables.debug)
-            writeLog(text="VFSstorage update #resource.path#");
-        resource.LastModified = now();
-        resource.length = len(arguments.file);
+    function update(any resource, any file){
+        logger(text="vfsStorage update #resource.path#");
+        resource.setLastModified();
+        resource._length = len(arguments.file);
         this.storage[arguments.resource.path].file = arguments.file;
         // resource is passed by reference, should be updated in storage
         return;
     }
 
-    function _remove(String path){
-        structDelete(this.storage, arguments.path);
+    function remove(String path){
+        if (arguments.path neq "/") // don't delete the root (other providers like ram:// throw an error)
+            structDelete(this.storage, arguments.path);
     }
 
-    function _read(String path){
-        if (!_exists(arguments.path)){
+    function read(String path){
+        if (!exists(arguments.path)){
             throw "[#arguments.path#] doesn't exist";
         } else {
-            return this.storage[arguments.path];
+            var res = this.storage[arguments.path];
+            logger("vfsStorage read:  [#res.resource.path# dir:#res.resource.isDir# exists:#res.resource.exists()#]");
+            return res;
         }
     }
 
-    public boolean function _exists(string path){
+    public boolean function exists(string path){
         return structKeyExists(this.storage, arguments.path);
     }
 
-    public array function _list(any resource, boolean recurse=false) localmode=true{
+    public array function list(any resource, boolean recurse=false) localmode=true{
         local._path = resource.path;
         local._len = len(resource.path);
         local._depth = listLen(_path, this.separator);
         local.resources = [];
 
-        if (variables.debug)
-            writeLog(text="#_path# listResources [#structKeyList(this.storage)#]");
+        logger(text="vfsStorage #_path# listResources [#structKeyList(this.storage)#]");
 
         loop collection="#this.storage#" index="local.index" item="local.file"{
             local.res = local.file.resource;
@@ -76,18 +66,17 @@ component {
                 if (arguments.recurse || res.depth == _depth)
                     arrayAppend(resources, res);
             } else {
-                //writeLog(text="NO MATCH: [#resource.path# vs #_path#] listResources [#res.path# vs #local.fileParentPath#] (#_depth# vs #res.depth#)");
+                //logger(text="NO MATCH: [#resource.path# vs #_path#] listResources [#res.path# vs #local.fileParentPath#] (#_depth# vs #res.depth#)");
             }
         }
-        if (variables.debug)
-            writeLog(text="#_path# listResources [#structCount(this.storage)#] returned #arrayLen(resources)# resources");
+        logger(text="vfsStorage #_path# listResources [#structCount(this.storage)#] returned #arrayLen(resources)# resources");
         return resources;
     }
 
-    public void function _createDirectoryPath(any resource, any vfs){
+    public void function createDirectoryPath(any resource, any vfs){
         // special case, creating the root folder
         if (resource.path eq this.separator){
-            _createDirectoryEntry(resource);
+            createDirectoryEntry(resource);
             return;
         }
         var _path = listToArray(resource.path, this.separator);
@@ -96,19 +85,27 @@ component {
             ArrayAppend(newpath, _path[f]);
             var folder = this.separator & ArrayToList(newPath, this.separator);
             ////////  how to create a resource here?
-            if (!_exists(folder)){
-                _createDirectoryEntry(vfs._getResource(folder));
+            if (!exists(folder)){
+                createDirectoryEntry(vfs.getResource(folder));
             }
         }
     }
 
-    public void function _createDirectoryEntry(any resource){
-        if (variables.debug)
-            writeLog("_createDirectoryEntry:  [#resource.path# dir:#resource.isDir# exists:#resource.exists#]");
+    public void function createDirectoryEntry(any resource){
         resource.IsDir = true;
-        resource.exists = true;
+        resource.setExists(true);
         resource.name = listLast(resource.path,"/\");
-        resource.LastModified = now();
-        _add(resource);
+        resource.setLastModified();
+        logger("vfsStorage createDirectoryEntry:  [#resource.path# dir:#resource.isDir# exists:#resource.exists()#, #resource._exists#]");
+        add(resource);
     }
+    /*
+    public any function onMissingMethod(string name, struct args){
+        logger(text="VFSstorage #arguments.name#(#SerializeJson(args)#)");
+        if (isCustomFunction(this["_#arguments.name#"]))
+            return invoke(this, "_#arguments.name#", arguments.args);
+        else
+           throw "#arguments.name# not implemented";
+    }
+    */
 }

@@ -1,31 +1,29 @@
-component /*implements="resourceProvider" */{
+component /*implements="resourceProvider" */ extends="vfsBase" {
 
     public any function init(string scheme, struct args){
         variables.scheme = arguments.scheme;
         variables.args = arguments.args;
-        variables.vfs = new vfs(scheme);
-        writeLog(text="init: #SerializeJson(arguments)#");
+        variables.vfs = new vfsDebugWrapper(
+            new vfs(arguments.scheme),
+            "vfs"
+        );
+        logger(text="init: #SerializeJson(arguments)#");
         return this;
     }
 
-    public any function onMissingMethod(string name, struct args){
-        writeLog(text="#arguments.name#: #SerializeJson(arguments.args)#");
-        throw "#arguments.name# not implemented";
-    }
-
-    public any function getResource(String path){
+    public any function getResource(required string path){
         return variables.vfs.getResource(arguments.path);
     }
 
     public boolean function isCaseSensitive(){
-        return true;
-    };
+        return false;
+    }
 
 	public boolean function isModeSupported(){
         return false;
-    };
+    }
 
 	public boolean function isAttributesSupported(){
         return false;
-    };
+    }
 }
