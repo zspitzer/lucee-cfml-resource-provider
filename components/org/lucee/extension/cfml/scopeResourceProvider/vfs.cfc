@@ -5,7 +5,7 @@ component /*implements="resource"  accessors=true */ extends="vfsBase" {
         this.separator = "/";
         this.scheme = arguments.scheme;
         this.storage = new vfsDebugWrapper(
-            new vfsStorage(this.scheme, this.separator),
+            new vfsStorage(this.scheme, this.separator, this),
             "vfsStorage"
         );
         var root =  new vfsDebugWrapper(
@@ -20,7 +20,7 @@ component /*implements="resource"  accessors=true */ extends="vfsBase" {
         var _path = cleanPath(arguments.path);
         if (this.storage.exists(_Path)){
             logger(text="VFS getResource #_path#");
-            return this.storage.read(_path).resource;
+            return this.storage.read(_path);
         }
         logger(text="VFS getResource DUMMY #_path#");
         return new vfsDebugWrapper(
@@ -41,7 +41,7 @@ component /*implements="resource"  accessors=true */ extends="vfsBase" {
         var parentPath = getParent(arguments.resource);
         if (this.storage.exists(parentPath)){
             logger(text="VFS getParentResource [#parentPath#] from [#arguments.resource.path#]");
-            return this.storage.read(parentPath).resource;
+            return this.storage.read(parentPath);
         }
         if (arguments.empty)
             return getResource(parentPath);

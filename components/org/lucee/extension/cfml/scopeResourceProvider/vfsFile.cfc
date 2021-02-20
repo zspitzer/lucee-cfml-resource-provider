@@ -1,16 +1,20 @@
 component accessors=false extends="vfsBase" {
-    public any function init(required string schemeName, required any provider, required string filePath){
+    public any function init(required string schemeName, required any provider, required string filePath, struct meta={}){
         this.separator = "/";
         this.scheme= arguments.schemeName;
-        this.path = arguments.filePath;
-        this.depth = listLen(this.path, this.separator)-1;
-        if (this.depth < 0)
-            this.depth = 0;
-        this.name = listLast(this.path, this.separator);
         this.isDir = false;
         this._exists = false;
         this._lastModified = "";
         this._length = 0;
+        this.path = arguments.filePath;
+
+        if (structCount(meta))
+            structAppend(this, meta);
+        this.depth = listLen(this.path, this.separator)-1;
+        if (this.depth < 0)
+            this.depth = 0;
+        this.name = listLast(this.path, this.separator);
+
         variables.provider = arguments.provider;
         logger(text="create #arguments.filePath#");
     }
@@ -48,8 +52,7 @@ component accessors=false extends="vfsBase" {
     }
 
     function getBinary(){
-        var resource = variables.provider.storage.read(this.path);
-        return resource.file;
+        return variables.provider.storage.readBinary(this.path);
     }
 
     boolean function setLastModified(required lastModified=now()){
@@ -121,7 +124,7 @@ component accessors=false extends="vfsBase" {
             name: this.name,
             path: this.path,
             depth: this.depth,
-            lastModified: this._lastModified,
+            _lastModified: this._lastModified,
             isDir: this.isDir,
             _length: this._length,
             _exists: this._exists

@@ -64,13 +64,15 @@ You need to restart lucee if you make any changes to the installed files under `
 
 ### Performance
 
-You can benchmark against the built in `ram://` VFS drive by calling `test.cfm?scheme=ram`
+You can benchmark against the built in `ram://` VFS drive by calling `test.cfm?scheme=ram&dump=true`
 
 This cfml resource provider is **quite close in performance to the built in ram drive**. 
 
-Ram drives return more metadata to `DirectoryList` which makes the `test.cfm` run slower, you can disable the dumps in `test.cfm`
+Ram drives return more metadata to `DirectoryList` which makes the `test.cfm` run slower, you can disable the dumps in `test.cfm` with `?dump=false`
 
-At the moment, I am using `onMissingMethod` to see just which methods need to be supported for a bare bones resource provider, which is lots of overhead
+At the moment, I am using `onMissingMethod` to see just which methods need to be supported for a bare bones resource provider, which is some overhead plus a fake `onMissingProperty` https://luceeserver.atlassian.net/browse/LDEV-3260
+
+https://github.com/zspitzer/lucee-scope-resource-provider/blob/master/components/org/lucee/extension/cfml/scopeResourceProvider/vfsDebugWrapper.cfc#L14
 
 All the resource provider calls are logged out to `application.log` for debugging, there is a `variables.debug=boolean` in the various cfcs
 

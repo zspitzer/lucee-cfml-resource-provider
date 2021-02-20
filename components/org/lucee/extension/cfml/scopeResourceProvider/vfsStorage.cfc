@@ -1,12 +1,36 @@
 component extends="vfsBase" {
-    public any function init(string scheme, string separator){
+    public any function init(string scheme, string separator, required any provider){
         this.separator = "/";
         this.scheme = arguments.scheme;
-        this.storage = {};
+        this.provider = arguments.provider;
+        var vfs = {};
+        var vfs_key = "__vfs";
+        switch (arguments.scheme){
+            case "session":
+                if (!structKeyExists(session, vfs_key))
+                    session[vfs_key] = {};
+                vfs = session[vfs_key];
+                break;
+            case "application":
+                if (!structKeyExists(application, vfs_key))
+                    application[vfs_key] = {};
+                vfs = application[vfs_key];
+                break;
+            case "request":
+                if (!structKeyExists(request, vfs_key))
+                    request[vfs_key] = {};
+                vfs = request[vfs_key];
+                break;
+            case "cfml":
+                break;
+            default:
+                throw "unsupported vfs scheme #arguments.scheme#";
+            }
+        this.storage = vfs;
         return this;
     }
 
-    function add(any resource){
+    function add(required any resource){
         logger(text="VFSstorage ADD #arguments.resource.path#");
 
         resource.setExists(true);
@@ -16,40 +40,52 @@ component extends="vfsBase" {
         logger("vfsStorage add:  [#resource.path# dir:#resource.isDir# exists:#resource.exists()#]");
 
         this.storage[arguments.resource.path] = {
-            resource: arguments.resource
-        }
-        return;
+            meta: arguments.resource.toStruct()
+        };
     }
 
-    function update(any resource, any file){
-        logger(text="vfsStorage update #resource.path#");
-        resource.setLastModified();
-        resource._length = len(arguments.file);
-        this.storage[arguments.resource.path].file = arguments.file;
-        // resource is passed by reference, should be updated in storage
-        return;
+    function update(required any resource, required any file){
+        logger(text="vfsStorage update #arguments.resource.path#");
+        arguments.resource.setLastModified();
+        arguments.resource._length = len(arguments.file);
+        this.storage[arguments.resource.path] = {
+            meta: arguments.resource.toStruct(),
+            file: arguments.file
+        };
     }
 
-    function remove(String path){
+    function remove(required string path){
         if (arguments.path neq "/") // don't delete the root (other providers like ram:// throw an error)
             structDelete(this.storage, arguments.path);
     }
 
-    function read(String path){
+    function read(required string path){
         if (!exists(arguments.path)){
             throw "[#arguments.path#] doesn't exist";
         } else {
             var res = this.storage[arguments.path];
-            logger("vfsStorage read:  [#res.resource.path# dir:#res.resource.isDir# exists:#res.resource.exists()#]");
-            return res;
+            logger("vfsStorage read:  [#res.meta.path# dir:#res.meta.isDir# exists:#res.meta._exists#]");
+            return new vfsDebugWrapper(
+                new vfsFile(this.scheme, this.provider, arguments.path, res.meta),
+                "vfsFile"
+            );
         }
     }
 
-    public boolean function exists(string path){
+    function readBinary(required string path){
+        if (!exists(arguments.path)){
+            throw "[#arguments.path#] doesn't exist";
+        } else {
+            var res = this.storage[arguments.path];
+            return res.file;
+        }
+    }
+
+    public boolean function exists(required string path){
         return structKeyExists(this.storage, arguments.path);
     }
 
-    public array function list(any resource, boolean recurse=false) localmode=true{
+    public array function list(required any resource, boolean recurse=false) localmode=true{
         local._path = resource.path;
         local._len = len(resource.path);
         local._depth = listLen(_path, this.separator);
@@ -58,13 +94,18 @@ component extends="vfsBase" {
         logger(text="vfsStorage #_path# listResources [#structKeyList(this.storage)#]");
 
         loop collection="#this.storage#" index="local.index" item="local.file"{
-            local.res = local.file.resource;
+
+            local.res = local.file.meta;
             local.fileParentPath = mid(res.path, 1, _len);
 
             if (res.path neq _path // ignore itself!
                     && fileParentPath eq _path){
-                if (arguments.recurse || res.depth == _depth)
-                    arrayAppend(resources, res);
+                if (arguments.recurse || res.depth == _depth){
+                    arrayAppend(resources, new vfsDebugWrapper(
+                        new vfsFile(this.scheme, this.provider, res.path, res),
+                        "vfsFile"
+                    ));
+                }
             } else {
                 //logger(text="NO MATCH: [#resource.path# vs #_path#] listResources [#res.path# vs #local.fileParentPath#] (#_depth# vs #res.depth#)");
             }
