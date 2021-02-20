@@ -15,7 +15,6 @@ component accessors=false {
         this.lastModified = "";
         this.length = 0;
         variables.provider = arguments.provider;
-
     }
     public any function onMissingMethod(string name, struct args={}){
         if (variables.debug)
@@ -59,14 +58,12 @@ component accessors=false {
             throw "_setBinary: can't write content to a dir";
         if (!this.exists)
             _createFile(false);
-        variables.provider.storage._add(this.path, arguments.byteArray);
-        this.length = len(arguments.byteArray)
-        return this.length;
+        variables.provider.storage.update(this, arguments.byteArray);
     };
 
     function _getBinary(){
-        var file = variables.provider.storage._read(this.path);
-        return file;
+        var resource = variables.provider.storage.read(this.path);
+        return resource.file;
     };
 
     boolean function _setLastModified(_lastModified){
@@ -104,32 +101,32 @@ component accessors=false {
 
     function _getRealResource(String _path){
         if (this.exists)
-            return variables.provider._getRealResource(this, this.path & this.separator & _path);
+            return variables.provider.getRealResource(this, this.path & this.separator & _path);
         else
             return;
     };
 
     function _getParent(){
-        variables.provider._getParent(this);
+        variables.provider.getParent(this);
     };
 
     function _getParentResource(){
-        variables.provider._getParentResource(this);
+        variables.provider.getParentResource(this);
     };
 
     function _createFile(boolean createParentWhenNotExists){
-        variables.provider._createFile(this, createParentWhenNotExists);
+        variables.provider.createFile(this, createParentWhenNotExists);
     };
 
     function _remove(boolean force){
-        variables.provider._remove(this, force);
+        variables.provider.remove(this, force);
     };
 
     function _createDirectory(boolean createParentWhenNotExists){
-        variables.provider._createDirectory(this, createParentWhenNotExists);
+        variables.provider.createDirectory(this, createParentWhenNotExists);
     };
 
     function _listResources(){
-        return variables.provider._listResources(this);
+        return variables.provider.listResources(this);
     };
 }

@@ -15,8 +15,8 @@
     }
     */
 
-    function doDump(var, label, expand, top){
-//        return; // ram drives return more meta data so dumps are slower, comment out to compare
+    function doDump(){
+        //return; // ram drives return more meta data so dumps are slower, comment out to compare
         dump(argumentCollection=arguments);
     }
 
@@ -32,7 +32,7 @@
     nested="#scheme#://nested/is/in/berlin";
 
     writeLog("-----------------------DirectoryCreate");
-    doDump("DirectoryCreate #nested# (nested)");
+    doDump(var="DirectoryCreate #nested# (nested)");
     if (!DirectoryExists(nested))
         DirectoryCreate(nested, true);
 
@@ -42,7 +42,7 @@
     d = "#scheme#://Zac";
 
     writeLog("-----------------------DirectoryCreate");
-    doDump("DirectoryCreate #d#");
+    doDump(var="DirectoryCreate #d#");
     if (!DirectoryExists(d))
         DirectoryCreate(d);
 
@@ -51,7 +51,7 @@
     doDump(var=q, label="DirectoryList (top level, no recurse)");
 
     writeLog("-----------------------DirectoryDelete");
-    doDump("DirectoryDelete #d#");
+    doDump(var="DirectoryDelete #d#");
     DirectoryDelete(d);
 
     q = DirectoryList(path="#scheme#://",listinfo="query",recurse=true);
@@ -59,7 +59,7 @@
 
     nest="#scheme#://nested";
     writeLog("-----------------------DirectoryDelete");
-    doDump("DirectoryDelete #nest#");
+    doDump(var="DirectoryDelete #nest#");
     DirectoryDelete(nest, true);
 
     q = DirectoryList(path="#scheme#://",listinfo="query",recurse=true);
@@ -80,7 +80,7 @@
 
 
     writeLog("----------------------fileWrite");
-    doDump("fileWrite #f#");
+    doDump(var="fileWrite #f#");
 
     txt= "hi zac";
 
@@ -102,8 +102,8 @@
     i = GetFileInfo(f);
     doDump(var=i, label="getFileInfo #f#");
     } catch(e){
-        doDump("ERROR: getFileInfo (#f#)" & cfcatch.message);
-        doDump(cfcatch);
+        doDump(var="ERROR: getFileInfo (#f#)" & cfcatch.message);
+        doDump(car=cfcatch);
         abort;
     }
 
@@ -111,7 +111,7 @@
     doDump(var=q, label="DirectoryList");
 
     writeLog("-----------------------FileDelete");
-    doDump("fileDelete #f#");
+    doDump(var="fileDelete #f#");
     FileDelete(f);
 
     q = DirectoryList(path="#scheme#://",listinfo="query",recurse=true);
@@ -121,7 +121,7 @@
     srcImg = ImageNew("",10,10);
     writeLog("-----------------------getTempFile");
     img = getTempFile(d,"tmp") & ".png";
-    doDump("ImageWrite #img#");
+    doDump(var="ImageWrite #img#");
     writeLog("-----------------------ImageWrite");
     ImageWrite(srcImg, img);
     if (not FileExists(img))

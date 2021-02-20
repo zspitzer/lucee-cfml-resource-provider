@@ -7,7 +7,7 @@ component /*implements="resourceProvider" */{
         writeLog(text="init: #SerializeJson(arguments)#");
         return this;
     }
-    
+
     public any function onMissingMethod(string name, struct args){
         writeLog(text="#arguments.name#: #SerializeJson(arguments.args)#");
         throw "#arguments.name# not implemented";
