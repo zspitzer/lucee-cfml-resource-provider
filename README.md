@@ -48,7 +48,10 @@ turns out cfml extension resource providers don't get installed (yet) https://lu
 
 **you need to manually add the following line to lucee-server.xml in the resources section**
 
-`<resource-provider arguments="lock-timeout:10000" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="request"/>`
+`<resource-provider arguments="lock-timeout:10000;scope:cfml" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="cfml"/>
+<resource-provider arguments="lock-timeout:10000;scope:request" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="request"/>
+<resource-provider arguments="lock-timeout:10000;scope:application" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="application"/>
+<resource-provider arguments="lock-timeout:10000;scope:session" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="session"/>`
 
 There are outstanding bugs relating to resources in Lucee https://luceeserver.atlassian.net/issues/?jql=labels%20%3D%20resources
 
