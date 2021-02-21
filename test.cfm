@@ -1,33 +1,18 @@
 <cfscript>
-    /*
-    x= new org.lucee.extension.cfml.scopeResourceProvider.vfsFile('zac', {},"/");
-
-
-    loop collection="#x#" key="local.key" value="local.value" {
-        if (structKeyExists(x, local.key) && !isCustomFunction(local.value)){
-            //this[local.key] = arguments.comp[local.key];
-            echo("prop: #local.key# = #local.value#");
-        }
-    }
-    abort;
-
-    dump(x);
-    dump(getMetaData(x));
-    dump(getComponentMetaData(x));
-
-    abort;
-*/
-
     param name="scheme" default="request";
     param name="dump" default="true";
-
     if (scheme== "")
         scheme="request";
 
     dumpEnabled = dump;
     /*
     pc = getPageContext();
+    pc.requestScope().vfs=1;
+    dump(pc.requestScope());
+    abort;
+    */
 
+    /*
     cfg = pc.getconfig();
     rp = cfg.getResourceProviders();
 
@@ -46,14 +31,11 @@
             dump(argumentCollection=arguments);
     }
 
-    setting requesttimeout=5;
+    setting requesttimeout=85;
     timer type="outline"{
     writeLog("-----------------------");
 
     doDump(var=getVFSMetaData("request"), label="getVFSMetaData");
-
-    q = DirectoryList("#scheme#://");
-    doDump(var=q, label="DirectoryList");
 
     nested="#scheme#://nested/is/in/berlin";
 
@@ -62,8 +44,11 @@
     if (!DirectoryExists(nested))
         DirectoryCreate(nested, true);
 
-    q = DirectoryList(path="#scheme#://",listinfo="query",recurse=true);
-    doDump(var=q, label="DirectoryList (nested)");
+    loop list="name,path,query" item="listinfo" {
+        q = DirectoryList(path="#scheme#://",listinfo=listinfo,recurse=true);
+        doDump(var=q, label="DirectoryList listinfo=#listinfo# (nested)");
+    }
+
 
     d = "#scheme#://Zac";
 
@@ -86,6 +71,7 @@
     nest="#scheme#://nested";
     writeLog("-----------------------DirectoryDelete");
     doDump(var="DirectoryDelete #nest#");
+
     DirectoryDelete(nest, true);
 
     q = DirectoryList(path="#scheme#://",listinfo="query",recurse=true);
@@ -103,14 +89,19 @@
     q = DirectoryList(path="#scheme#://",listinfo="query",recurse=true);
     doDump(var=q, label="DirectoryList");
 
-
-
     writeLog("----------------------fileWrite");
     doDump(var="fileWrite #f#");
 
     txt= "hi zac";
 
     FileWrite(f, txt);
+
+    // get the file resource
+    res = fileOpen(f);
+    doDump(var=res.getResource().getClass(),expand='false', label="open file, get Resource");
+    doDump(var=res.getResource().getResourceProvider(),expand='false', label="open file, get ResourceProvider");
+
+    FileClose(res);
 
     doDump(var=isImageFile(f), label="isImageFile #f#");
     writelog("-----------------------------FileRead");
@@ -195,8 +186,10 @@
     try {
         DirectoryDelete(purge, false);
     } catch (e){
-        dump("EXPECTED ERROR:" & cfcatch.message);
+        dodump("EXPECTED ERROR:" & cfcatch.message);
     }
+
+    doDump(session);
 
     DirectoryDelete(purge, true);
 

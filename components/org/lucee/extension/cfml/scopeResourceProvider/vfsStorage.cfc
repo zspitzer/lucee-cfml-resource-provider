@@ -1,32 +1,36 @@
 component extends="vfsBase" {
-    public any function init(string scheme, string separator, required any provider){
+    public any function init(string scheme, struct args, string separator, required any provider){
         this.separator = "/";
         this.scheme = arguments.scheme;
         this.provider = arguments.provider;
-        var vfs = {};
-        var vfs_key = "__vfs";
+        var vfsKey = "__vfs";
+
+        logger(text="VFSstorage INIT #arguments.scheme# as [#vfsKey#]");
+
+        var scope="";
         switch (arguments.scheme){
             case "session":
-                if (!structKeyExists(session, vfs_key))
-                    session[vfs_key] = {};
-                vfs = session[vfs_key];
+                scope = getPageContext().sessionScope();
                 break;
             case "application":
-                if (!structKeyExists(application, vfs_key))
-                    application[vfs_key] = {};
-                vfs = application[vfs_key];
+                scope = getPageContext().applicationScope();
                 break;
             case "request":
-                if (!structKeyExists(request, vfs_key))
-                    request[vfs_key] = {};
-                vfs = request[vfs_key];
+                scope = getPageContext().requestScope();
+                break;
+            case "server":
+                scope = getPageContext().serverScope();
                 break;
             case "cfml":
+                scope = this;
                 break;
+                // TODO support custom storage component
             default:
                 throw "unsupported vfs scheme #arguments.scheme#";
-            }
-        this.storage = vfs;
+        }
+        if (!structKeyExists(scope, vfsKey))
+            scope[vfsKey] = structNew(); // TODO pass in cass-insenstive from args
+        this.storage = scope[vfsKey];
         return this;
     }
 

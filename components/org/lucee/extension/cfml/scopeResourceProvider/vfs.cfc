@@ -1,11 +1,11 @@
 component /*implements="resource"  accessors=true */ extends="vfsBase" {
 
-    public any function init(string scheme){
+    public any function init(string scheme, string scope, struct args){
         logger(text="#SerializeJson(arguments)#");
         this.separator = "/";
         this.scheme = arguments.scheme;
         this.storage = new vfsDebugWrapper(
-            new vfsStorage(this.scheme, this.separator, this),
+            new vfsStorage(this.scheme, arguments.args, this.separator, this),
             "vfsStorage"
         );
         var root =  new vfsDebugWrapper(

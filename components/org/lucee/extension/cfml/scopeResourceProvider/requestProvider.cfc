@@ -12,7 +12,7 @@ component /*implements="resourceProvider" */ extends="vfsBase" {
     public any function getResource(required string path){
          if (!structKeyExists(variables.vfs, variables.scope)){
             logger(text="create vfs: #variables.scope#");
-            var newVfs = new vfs(variables.scope);
+            var newVfs = new vfs(variables.scheme, variables.scope, variables.args);
             variables.vfs[variables.scope] = new vfsDebugWrapper(
                 newVfs,
                 "vfs-#variables.scope#"
@@ -22,7 +22,7 @@ component /*implements="resourceProvider" */ extends="vfsBase" {
     }
 
     public boolean function isCaseSensitive(){
-        return false;
+        return false; // TODO respect cass-insenstive from args
     }
 
 	public boolean function isModeSupported(){
