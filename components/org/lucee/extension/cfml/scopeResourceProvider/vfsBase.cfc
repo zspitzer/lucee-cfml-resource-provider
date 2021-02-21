@@ -1,5 +1,5 @@
 component {
-    variables.debug = false;
+    variables.debug = true;
 
     public any function init(){
         return this;

@@ -5,6 +5,8 @@
         scheme="request";
 
     dumpEnabled = dump;
+
+
     /*
     pc = getPageContext();
     pc.requestScope().vfs=1;
@@ -35,7 +37,7 @@
     timer type="outline"{
     writeLog("-----------------------");
 
-    doDump(var=getVFSMetaData("request"), label="getVFSMetaData");
+    doDump(var=getVFSMetaData(scheme), label="getVFSMetaData");
 
     nested="#scheme#://nested/is/in/berlin";
 
@@ -152,26 +154,38 @@
     writelog("imageRead");
     doDump(var=imageRead(img), expand=false, label="imageRead");
 
-
+    doDump(var=q, label="Create nested");
     d ="#scheme#://dirs";
     if (!DirectoryExists(d))
         DirectoryCreate(d);
+    c= 1;
+
+    writeLog("-----------------------DirectoryList");
+    q = DirectoryList(path="#scheme#://",listinfo="query",recurse=true);
+    doDump(var=q, label="DirectoryList after create #d#");
+
     FileWrite(d & "/zero.txt","zero");
     loop list="oz,uk,de,ch" item="local.i"{
         dd = d & "/" & local.i;
         if (!DirectoryExists(dd))
             DirectoryCreate(dd);
         FileWrite(dd & "/one.txt","one");
+        c++;
         FileWrite(dd & "/two.txt","two");
+        c++;
     }
 
-    writeLog("-----------------------DirectoryList");
-    q = DirectoryList(path="#scheme#://dirs",listinfo="query",recurse=false);
-    doDump(var=q, label="DirectoryList");
+    writeLog("-----------------------DirectoryList #d#");
+    q = DirectoryList(path=d,listinfo="query",recurse=false);
+    doDump(var=q, label="DirectoryList #d#");
 
-    writeLog("-----------------------DirectoryList recurse");
-    q = DirectoryList(path="#scheme#://dirs",listinfo="query",recurse=true);
-    doDump(var=q, label="DirectoryList");
+
+    writeLog("-----------------------DirectoryList recurse #d#");
+    q = DirectoryList(path=d,listinfo="query",recurse=true);
+    doDump(var=q, label="DirectoryList #d# recurse");
+
+    if (q.recordcount lt c)
+        throw "expecting at least #c# files, only found  #q.recordcount#";
 
     writeLog("-----------------------DirectoryCopy recurse");
     copyDest ="#scheme#://copy";
@@ -189,7 +203,8 @@
         dodump("EXPECTED ERROR:" & cfcatch.message);
     }
 
-    doDump(session);
+
+    /*
 
     DirectoryDelete(purge, true);
 
@@ -198,5 +213,9 @@
     doDump(var=q, label="DirectoryList (should be empty)");
     if (q.recordcount gt 0)
         throw "DirectoryList (should be empty)"
+        */
 }
+dump(session);
+dump(request);
+dump(application);
 </cfscript>

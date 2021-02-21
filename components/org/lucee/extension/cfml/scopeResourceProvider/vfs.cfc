@@ -1,52 +1,85 @@
 component /*implements="resource"  accessors=true */ extends="vfsBase" {
 
-    public any function init(string scheme, struct args){
+    public any function init(struct cfg){
         logger(text="#SerializeJson(arguments)#");
-        this.separator = "/";
-        this.scheme = arguments.scheme;
-        this.storage = new vfsDebugWrapper(
-            new vfsStorage(this.scheme, arguments.args, this.separator, this),
-            "vfsStorage"
-        );
-        var root =  new vfsDebugWrapper(
-            new vfsFile(this.scheme, this, this.separator),
-            "rootVFSfile"
-        );
-        createDirectory(root, true);
+        this.separator = arguments.cfg.separator;
+        this.cfg = arguments.cfg;
+        this.scheme = arguments.cfg.scheme;
         return this;
     }
 
-    public any function getResource(required string path){
+    // main entry point
+    public any function getResource(required string path, required any storage, any store){
+
+        if (structKeyExists(arguments, "store")){
+            // create if we need to init the store
+            arguments.storage = new vfsDebugWrapper(
+                new vfsStorage(this.cfg, this.separator, this, arguments.store),
+                "vfsStorage"
+            );
+
+            if (arguments.store.count() eq 0){
+                // add a root directory
+                var root =  new vfsDebugWrapper(
+                    new vfsFile(this.scheme, this, arguments.storage, this.separator),
+                    "rootVFSfile"
+                );
+                createDirectory(root, true);
+            }
+        }
+
         var _path = cleanPath(arguments.path);
-        if (this.storage.exists(_Path)){
+        var res = storage.read(_path);
+        if (structCount(res) gt 0){
             logger(text="VFS getResource #_path#");
-            return this.storage.read(_path);
+            return res;
         }
         logger(text="VFS getResource DUMMY #_path#");
         return new vfsDebugWrapper(
-            new vfsFile(this.scheme, this, _path),
+            new vfsFile(this.scheme, this, arguments.storage, _path),
             "vfsFile"
         );
     }
 
-    public any function getRealResource(required any resource, String path){
-        return getResource(arguments.path);
+    public void function createDirectory(required any resource, boolean createParentWhenNotExists=false){
+        local.parent = getParentResource(arguments.resource, true);
+        if (!local.parent.exists()){
+            if (arguments.createParentWhenNotExists)
+                arguments.resource.getStorage().createDirectoryPath(local.parent, this);
+            else
+                throw "Cannot create directory, parent directory [#local.parent.path#] doesn't exist";
+        }
+        arguments.resource.getStorage().createDirectoryEntry(arguments.resource);
     }
-
-    public array function listResources(required any resource, boolean recurse=false){
-        return this.storage.list(arguments.resource, arguments.recurse);
-    };
 
     public any function getParentResource(required any resource, boolean empty=false){
         var parentPath = getParent(arguments.resource);
-        if (this.storage.exists(parentPath)){
+        var res = arguments.resource.getStorage().read(parentPath);
+        if (structCount(res) gt 0){
             logger(text="VFS getParentResource [#parentPath#] from [#arguments.resource.path#]");
-            return this.storage.read(parentPath);
+            return res;
         }
         if (arguments.empty)
-            return getResource(parentPath);
+            return getResource(parentPath, arguments.resource.getStorage());
         logger(text=" VFS getParentResource [#parentPath#] from [#arguments.resource.path#] not found");
         return; // null
+    }
+
+    public string function getParent(required any resource){
+        var parent = listToArray(arguments.resource.path,"/\");
+        if (ArrayLen(parent) eq 0)
+            return this.separator; // root
+        ArrayDeleteAt(parent, ArrayLen(parent));
+        return this.separator & ArrayToList(parent, this.separator);
+    }
+
+
+    public any function getRealResource(required any resource, String path){
+        return getResource(arguments.path, arguments.resource.getStorage());
+    }
+
+    public array function listResources(required any resource, boolean recurse=false, boolean anyMatch=false){ // add short circuit for delete check
+        return arguments.resource.getStorage().list(arguments.resource, arguments.recurse, arguments.anyMatch);
     }
 
     public void function createFile(required any resource, boolean createParentWhenNotExists=false){
@@ -59,66 +92,25 @@ component /*implements="resource"  accessors=true */ extends="vfsBase" {
             }
         }
         arguments.resource.IsDir = false;
-        this.storage.add(arguments.resource);
-    }
-
-    public void function createDirectory(required any resource, boolean createParentWhenNotExists=false){
-        local.parent = getParentResource(arguments.resource, true);
-        if (!local.parent.exists()){
-            if (arguments.createParentWhenNotExists)
-                this.storage.createDirectoryPath(local.parent, this);
-            else
-                throw "Cannot create directory, parent directory [#local.parent.path#] doesn't exist";
-        }
-        this.storage.createDirectoryEntry(arguments.resource);
+        arguments.resource.getStorage().add(arguments.resource);
     }
 
     public void function remove(required any resource, boolean force=false){
-        var children = listResources(arguments.resource, true);
+        var children = listResources(resource=arguments.resource, recurse=true, anyMatch=!arguments.force); // use short circuit for delete check
+        local.store = arguments.resource.getStorage();
         if (arrayLen(children) gt 0){
             if (!arguments.force){
-                throw "Cannot Delete, [#arrayLen(children)#] child resources found";
+                throw "Cannot Delete [#arguments.resource.path#], child resources found";
             }
             // recursive delete
             loop array="#children#" index="local.file" {
-                this.storage.remove(local.file.path);
+                local.store.remove(local.file.path); // move into array for transaction??
             }
         }
-        this.storage.remove(arguments.resource.path);
+        local.store.remove(arguments.resource.path);
     }
 
     private function cleanPath(required string _path){
         return this.separator & ArrayToList(listToArray(arguments._path,"/\"), this.separator);
     }
-    public string function getParent(required any resource){
-        var parent = listToArray(arguments.resource.path,"/\");
-        if (ArrayLen(parent) eq 0)
-            return this.separator; // root
-        ArrayDeleteAt(parent, ArrayLen(parent));
-        return this.separator & ArrayToList(parent, this.separator);
-    };
-
-    /*
-    public any function onMissingMethod(string name, struct args){
-        logger(text="------------------VFS #SerializeJson(arguments)#");
-        if (isCustomFunction(this["_#arguments.name#"])){
-            return invoke(this, "_#arguments.name#", arguments.args);
-        } else {
-            throw "#arguments.name# not implemented";
-        }
-    }
-
-
-
-
-    // i don't think this ever gets called?
-    public boolean function exists(){
-        logger(text="VFS exists");
-        return (structCount(this.files) gt 0);
-    };
-
-    public boolean function isAbsolute(){
-        return true;
-    };
-    */
 }

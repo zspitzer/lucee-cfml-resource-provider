@@ -16,9 +16,10 @@ component extends="vfsBase" hint="wraps a cfc, logs all function calls with args
     private void function updateProperties(boolean logChange=false, boolean update=false){
         loop collection="#variables.obj#" key="local.key" value="local.value" {
             if (structKeyExists(variables.obj, local.key) && isSimpleValue(local.value)){
-                if (arguments.logChange
+                if (arguments.logChange && false
                         && structKeyExists(this, local.key)
                         && local.value neq this[local.key]){
+
                     if (arguments.update)
                         writelog("AFTER: #variables.path#.prop.#local.key# = [#local.value#] was [#this[local.key]#]");
                     else

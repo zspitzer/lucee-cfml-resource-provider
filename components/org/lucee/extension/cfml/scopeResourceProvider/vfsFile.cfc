@@ -1,8 +1,8 @@
 component accessors=false extends="vfsBase" {
-    public any function init(required string scheme, required any provider, required string filePath, struct meta={}){
+    public any function init(required string scheme, required any provider, required any storage, required string filePath, struct meta={}){
         this.separator = "/";
         this.scheme = arguments.scheme;
-
+        this.storage = arguments.storage;
         if (structCount(arguments.meta)){
             structAppend(this, arguments.meta);
         } else {
@@ -19,6 +19,10 @@ component accessors=false extends="vfsBase" {
 
         variables.provider = arguments.provider;
         logger(text="create #arguments.filePath#");
+    }
+
+    public any function getStorage(){
+        return this.storage;
     }
 
     function logger(text){
@@ -50,11 +54,11 @@ component accessors=false extends="vfsBase" {
             throw "_setBinary: can't write content to a dir";
         if (!this._exists)
             createFile(false);
-        variables.provider.storage.update(this, arguments.byteArray);
+        this.storage.update(this, arguments.byteArray);
     }
 
     function getBinary(){
-        return variables.provider.storage.readBinary(this.path);
+        return this.storage.readBinary(this.path);
     }
 
     boolean function setLastModified(required lastModified=now()){
@@ -132,28 +136,5 @@ component accessors=false extends="vfsBase" {
             _exists: this._exists
         };
     }
-
-    /*
-    public any function onMissingMethod(string name, struct args={}){
-        if (!variables.debug)
-            return local.result = invoke(this, "_#arguments.name#", arguments.args);
-
-        var _args = structCount(arguments.args) == 0 ? "" : SerializeJson(arguments.args);
-
-        if (isCustomFunction(this["_#arguments.name#"])){
-            logger(text="CALLING #this.path# #arguments.name#(#_args#)");
-            local.result = invoke(this, "_#arguments.name#", arguments.args);
-            if (!isNull(local.result)){
-                    logger(text="#this.path# #arguments.name#(#_args#) RETURNED: #SerializeJson(local.result)#");
-                return local.result;
-            } else {
-                logger(text="#this.path# #arguments.name#(#_args#)");
-                return;
-            }
-        } else {
-            throw "#arguments.name# not implemented";
-        }
-    }
-    */
 
 }

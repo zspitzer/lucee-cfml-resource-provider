@@ -6,31 +6,41 @@ component extends="vfsBase" {
     }
 
     function create(){
+        logger(text="create store");
         var structType = "normal";// this.args["case-sensitive"] ? "casesensitive" : "normal"; // acf 2001
-        return StructNew(structType);
+        return structNew(structType);
     }
 
-    function exists(string path resource){
+    function exists(string path){
         return structKeyExists(this.store, arguments.path);
     }
 
-    function set(string path resource, any data){
+    function set(string path, any data){
         this.store[arguments.path] = arguments.data;
     }
 
-    function get(string path resource){
-        return this.store[arguments.path];
+    function get(string path){
+        logger(text="files: #structKeyList(this.store)#");
+        return structFind(this.store, arguments.path, {});
     }
 
-    function delete(string path resource){
+    function delete(string path){
         return structDelete(this.store, arguments.path);
     }
 
-    function all(string path resource){
+    function all(string path){ // a folder based store could use path
         return this.store;
     }
 
-    function clear(string path resource){
+    function count(){
+        return structCount(this.store);
+    }
+
+    function clear(){
         this.store = create();
+    }
+
+    function usesFolders(){
+        return false;
     }
 }
