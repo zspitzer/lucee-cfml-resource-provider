@@ -46,22 +46,33 @@ But it doesn't show up as a resource provider (yet) see `listResourceProviders.c
 
 turns out cfml extension resource providers don't get installed (yet) https://luceeserver.atlassian.net/browse/LDEV-3286
 
-**you need to manually add the following line to lucee-server.xml in the resources section**
-
-`<resource-provider arguments="lock-timeout:10000;scope:cfml" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="cfml"/>
-<resource-provider arguments="lock-timeout:10000;scope:request" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="request"/>
-<resource-provider arguments="lock-timeout:10000;scope:application" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="application"/>
-<resource-provider arguments="lock-timeout:10000;scope:session" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="session"/>`
-
 There are outstanding bugs relating to resources in Lucee https://luceeserver.atlassian.net/issues/?jql=labels%20%3D%20resources
 
-`DirectoryList("request://");` has a stray / character ?
+`DirectoryList("request://");` has a stray / character on windows (affects other resource providers too)
+
+Init args passed to a cfml resource provider are a java hashmap https://luceeserver.atlassian.net/browse/LDEV-3291
 
 ### Status
 
+**You need to manually add the following line to `lucee-server.xml` in the `resources` section**
+
+You can either specifiy a `scope` or path to a `storageCFC` which implements the `vfsStore.cfc` interfaces
+
+i.e. scope
+
+`<resource-provider arguments="lock-timeout:10000;scope:cfml" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="cfml"/>
+<resource-provider arguments="lock-timeout:10000;scope:request" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="request"/>
+<resource-provider arguments="lock-timeout:10000;scope:server" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="server"/>
+<resource-provider arguments="lock-timeout:10000;scope:application" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="application"/>
+<resource-provider arguments="lock-timeout:10000;scope:session" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="session"/>`
+
+i.e. storageCFC
+
+`<resource-provider arguments="lock-timeout:10000;storageCFC:mapped.path.to.myCoolIdea" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="myCoolIdea"/>`
+
 Currently up and running, now in a BETA state, see `test.cfm`. 
 
-It's not currently doing anything with scopes, it's just a single static scope like the `ram://` resources, but in cfml!
+Scope support is very much a work in progress, they only get created for the first request context. i.e they don't get created for other requests, applications etc (yet)
 
 You need to restart lucee if you make any changes to the installed files under `\lucee-server\context\components\org\lucee\extension\cfml\scopeResourceProvider` rather than rebuilding and uploading a .lex file each time.
 

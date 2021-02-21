@@ -1,15 +1,15 @@
 component accessors=false extends="vfsBase" {
-    public any function init(required string schemeName, required any provider, required string filePath, struct meta={}){
+    public any function init(required string scheme, required any provider, required string filePath, struct meta={}){
         this.separator = "/";
-        this.scheme= arguments.schemeName;
+        this.scheme = arguments.scheme;
         this.isDir = false;
         this._exists = false;
         this._lastModified = "";
         this._length = 0;
         this.path = arguments.filePath;
 
-        if (structCount(meta))
-            structAppend(this, meta);
+        if (structCount(arguments.meta))
+            structAppend(this, arguments.meta);
         this.depth = listLen(this.path, this.separator)-1;
         if (this.depth < 0)
             this.depth = 0;
@@ -104,15 +104,15 @@ component accessors=false extends="vfsBase" {
     }
 
     function createFile(boolean createParentWhenNotExists=false){
-        variables.provider.createFile(this, createParentWhenNotExists);
+        variables.provider.createFile(this, arguments.createParentWhenNotExists);
     }
 
     function remove(boolean force=false){
-        variables.provider.remove(this, force);
+        variables.provider.remove(this, arguments.force);
     }
 
     function createDirectory(boolean createParentWhenNotExists=false){
-        variables.provider.createDirectory(this, createParentWhenNotExists);
+        variables.provider.createDirectory(this, arguments.createParentWhenNotExists);
     }
 
     function listResources(){

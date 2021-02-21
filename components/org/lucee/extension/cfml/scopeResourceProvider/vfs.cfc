@@ -1,6 +1,6 @@
 component /*implements="resource"  accessors=true */ extends="vfsBase" {
 
-    public any function init(string scheme, string scope, struct args){
+    public any function init(string scheme, struct args){
         logger(text="#SerializeJson(arguments)#");
         this.separator = "/";
         this.scheme = arguments.scheme;
