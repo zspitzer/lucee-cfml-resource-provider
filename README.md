@@ -79,7 +79,7 @@ Ram drives return more metadata to `DirectoryList` which makes the `test.cfm` ru
 
 At the moment, I am using `onMissingMethod` to see just which methods need to be supported for a bare bones resource provider, which is some overhead plus a fake `onMissingProperty` https://luceeserver.atlassian.net/browse/LDEV-3260
 
-https://github.com/zspitzer/lucee-scope-resource-provider/blob/master/components/org/lucee/extension/cfml/scopeResourceProvider/vfsDebugWrapper.cfc#L14
+https://github.com/zspitzer/lucee-cfml-resource-provider/blob/master/components/org/lucee/extension/cfml/scopeResourceProvider/vfsDebugWrapper.cfc#L14
 
 All the resource provider calls are logged out to `application.log` for debugging, there is a `variables.debug=boolean` in the various cfcs
 
