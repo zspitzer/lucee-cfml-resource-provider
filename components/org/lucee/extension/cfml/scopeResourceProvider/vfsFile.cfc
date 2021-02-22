@@ -18,8 +18,7 @@ component accessors=false extends="vfsBase" {
         }
 
         variables.provider = arguments.provider;
-        if (!arguments.dummy)
-            logger(text="create #arguments.filePath#");
+        // if (!arguments.dummy)             logger(text="create #arguments.filePath#");
     }
 
     public any function getStorage(){

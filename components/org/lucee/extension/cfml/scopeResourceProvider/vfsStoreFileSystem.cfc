@@ -3,7 +3,7 @@ component extends="vfsBase" {
         this.args = arguments.args;
         this.store = create();
         this.separator = this.args.separator;
-        if (structKeyExists(this.args.dir))
+        if (structKeyExists(this.args, "dir"))
             this.dir = this.args.dir;
         else
             this.dir = getTempDirectory();
@@ -11,7 +11,7 @@ component extends="vfsBase" {
     }
 
     function create(){
-        logger(text="vfsStoreFileSystem: create file store [#this.dir#]");
+        //logger(text="vfsStoreFileSystem: create file store [#this.dir#]");
         //var structType = "normal";// this.args["case-sensitive"] ? "casesensitive" : "normal"; // acf 2001
         //return structNew(structType);
     }
@@ -118,7 +118,7 @@ component extends="vfsBase" {
 
     function count(){
         var root = DirectoryExists(this.dir);
-        logger("Count: DirectoryExists(#this.dir#) #root#")
+        //logger("Count: DirectoryExists(#this.dir#) #root#")
         return root ? 1 : 0;
     }
 

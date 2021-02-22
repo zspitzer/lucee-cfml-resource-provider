@@ -6,7 +6,7 @@ component extends="vfsBase" {
     }
 
     function create(){
-        logger(text="create store");
+        //logger(text="create store");
         var structType = "normal";// this.args["case-sensitive"] ? "casesensitive" : "normal"; // acf 2001
         return structNew(structType);
     }

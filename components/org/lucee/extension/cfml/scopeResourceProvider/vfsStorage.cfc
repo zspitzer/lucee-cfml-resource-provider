@@ -40,16 +40,20 @@ component extends="vfsBase" {
 
     public any function read(required string path){
         var res = this.storage.get(arguments.path);
-        if (structCount(res) eq 0)
+        if (structCount(res) eq 0){
             res.meta = {};
             //throw "[#arguments.path#] doesn't exist";
-//        } else {
-            //logger("vfsStorage read:  [#res.meta.path# dir:#res.meta.isDir# exists:#res.meta._exists#]");
-        return new vfsDebugWrapper(
-            new vfsFile(this.scheme, this.provider, this, arguments.path, res.meta),
-            "vfsFile"
-        );
-//        }
+        } else {
+            logger("vfsStorage read:  [#res.meta.path# dir:#res.meta.isDir# exists:#res.meta._exists#]");
+        }
+        if (variables.debug){
+            return new vfsDebugWrapper(
+                new vfsFile(this.scheme, this.provider, this, arguments.path, res.meta),
+                "vfsFile"
+            );
+        } else {
+            return new vfsFile(this.scheme, this.provider, this, arguments.path, res.meta);
+        }
     }
 
     public any function readBinary(required string path){

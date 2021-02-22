@@ -5,10 +5,10 @@ component {
         return this;
     }
 
-    public void function logger(string text){
+    public void function logger(string text) output="false"{
         if (variables.debug){
             writeLog(text=arguments.text);
-            // echo("<pre style='margin:0'>#arguments.text#</pre>");            flush;
+            //echo("<pre style='margin:0'>#arguments.text#</pre>");            flush;
         }
     }
 

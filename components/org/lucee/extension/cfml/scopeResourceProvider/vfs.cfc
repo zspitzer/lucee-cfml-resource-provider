@@ -13,17 +13,25 @@ component /*implements="resource"  accessors=true */ extends="vfsBase" {
 
         if (structKeyExists(arguments, "store")){
             // create if we need to init the store
-            arguments.storage = new vfsDebugWrapper(
-                new vfsStorage(this.cfg, this.separator, this, arguments.store),
-                "vfsStorage"
-            );
+            if (variables.debug){
+                arguments.storage = new vfsDebugWrapper(
+                    new vfsStorage(this.cfg, this.separator, this, arguments.store),
+                    "vfsStorage"
+                );
+            } else {
+                arguments.storage = new vfsStorage(this.cfg, this.separator, this, arguments.store);
+            }
 
             if (arguments.store.count() eq 0){
                 // add a root directory
-                var root =  new vfsDebugWrapper(
-                    new vfsFile(this.scheme, this, arguments.storage, this.separator),
-                    "rootVFSfile"
-                );
+                if (variables.debug){
+                    var root =  new vfsDebugWrapper(
+                        new vfsFile(this.scheme, this, arguments.storage, this.separator),
+                        "rootVFSfile"
+                    );
+                } else {
+                    var root =  new vfsFile(this.scheme, this, arguments.storage, this.separator);
+                }
                 createDirectory(root, true);
             }
         }
@@ -35,10 +43,14 @@ component /*implements="resource"  accessors=true */ extends="vfsBase" {
             return res;
         }
         //logger(text="VFS getResource DUMMY #_path#");
-        return new vfsDebugWrapper(
-            new vfsFile(this.scheme, this, arguments.storage, _path),
-            "vfsFile"
-        );
+        if (variables.debug){
+            return new vfsDebugWrapper(
+                new vfsFile(this.scheme, this, arguments.storage, _path),
+                "vfsFile"
+            );
+        } else {
+            return new vfsFile(this.scheme, this, arguments.storage, _path);
+        }
     }
 
     public void function createDirectory(required any resource, boolean createParentWhenNotExists=false){
@@ -56,12 +68,12 @@ component /*implements="resource"  accessors=true */ extends="vfsBase" {
         var parentPath = getParent(arguments.resource);
         var res = arguments.resource.getStorage().read(parentPath);
         if (structCount(res) gt 0){
-            logger(text="VFS getParentResource [#parentPath#] from [#arguments.resource.path#]");
+            //logger(text="VFS getParentResource [#parentPath#] from [#arguments.resource.path#]");
             return res;
         }
         if (arguments.empty)
             return getResource(parentPath, arguments.resource.getStorage());
-        logger(text=" VFS getParentResource [#parentPath#] from [#arguments.resource.path#] not found");
+        //logger(text=" VFS getParentResource [#parentPath#] from [#arguments.resource.path#] not found");
         return; // null
     }
 
