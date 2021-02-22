@@ -16,9 +16,12 @@ i.e.  eventually
 
 `FileWrite("application://tempfile.png", imageObject );`
 
-CFML based Virtual File System
+Mailing List Discussion https://dev.lucee.org/t/experimental-cfml-based-resource-provider/7993
+
+CFML based Virtual File Systems
 
 https://docs.lucee.org/guides/lucee-5/extensions.html#cfml-based-virtual-file-system
+
 https://docs.lucee.org/guides/cookbooks/Vitural-FileSystem.html
 
 ### Plans / Ideas
@@ -90,6 +93,7 @@ The extension now installs, thanks @cfmitrah for pointing out the problem with t
 But it doesn't show up as a resource provider (yet) see `listResourceProviders.cfm`
 
 turns out cfml extension resource providers don't get installed (yet) https://luceeserver.atlassian.net/browse/LDEV-3286
+
 cfml resource providers can't see the calling scopes https://luceeserver.atlassian.net/browse/LDEV-3292
 
 There are outstanding bugs relating to resources in Lucee https://luceeserver.atlassian.net/issues/?jql=labels%20%3D%20resources
