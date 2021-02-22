@@ -28,13 +28,13 @@ component /*implements="resource"  accessors=true */ extends="vfsBase" {
             }
         }
 
-        var _path = cleanPath(arguments.path);
-        var res = storage.read(_path);
+        var _path = normalizePath(arguments.path);
+        var res = arguments.storage.read(_path);
         if (structCount(res) gt 0){
-            logger(text="VFS getResource #_path#");
+            //logger(text="VFS getResource #_path#");
             return res;
         }
-        logger(text="VFS getResource DUMMY #_path#");
+        //logger(text="VFS getResource DUMMY #_path#");
         return new vfsDebugWrapper(
             new vfsFile(this.scheme, this, arguments.storage, _path),
             "vfsFile"
@@ -98,19 +98,28 @@ component /*implements="resource"  accessors=true */ extends="vfsBase" {
     public void function remove(required any resource, boolean force=false){
         var children = listResources(resource=arguments.resource, recurse=true, anyMatch=!arguments.force); // use short circuit for delete check
         local.store = arguments.resource.getStorage();
-        if (arrayLen(children) gt 0){
+        if (arrayLen(children) gt 0 && children[1].path neq arguments.resource.path){
             if (!arguments.force){
                 throw "Cannot Delete [#arguments.resource.path#], child resources found";
             }
             // recursive delete
-            loop array="#children#" index="local.file" {
-                local.store.remove(local.file.path); // move into array for transaction??
+            if (local.store.usesFolders()){
+                // then need to sort, delete deepest first
+                arraySort(
+                    children,
+                    function (e1, e2){
+                        return len(e1.depth) lt len(e2.depth);
+                    },
+                    "asc"
+                );
+                local.store.remove(arguments.resource, true);
+                return;
+            } else {
+                loop array="#children#" index="local.file" {
+                    local.store.remove(local.file); // move into array for transaction??
+                }
             }
         }
-        local.store.remove(arguments.resource.path);
-    }
-
-    private function cleanPath(required string _path){
-        return this.separator & ArrayToList(listToArray(arguments._path,"/\"), this.separator);
+        local.store.remove(arguments.resource);
     }
 }

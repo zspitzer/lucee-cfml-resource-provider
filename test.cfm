@@ -46,13 +46,28 @@
     if (!DirectoryExists(nested))
         DirectoryCreate(nested, true);
 
-    loop list="name,path,query" item="listinfo" {
-        q = DirectoryList(path="#scheme#://",listinfo=listinfo,recurse=true);
-        doDump(var=q, label="DirectoryList listinfo=#listinfo# (nested)");
+    loop list="query, name,path" item="listinfo" {
+        loop list="true,false" item="r"{
+            q = DirectoryList(path="c:\temp\test\",listinfo=listinfo,recurse=r);
+            doDump(var=q, label="DirectoryList listinfo=#listinfo# (recurse=#r#) c:\temp\test\");
+
+            q = DirectoryList(path="#scheme#://",listinfo=listinfo,recurse=true);
+            doDump(var=q, label="DirectoryList listinfo=#listinfo# (recurse=#r#) #scheme#:// ");
+            echo("<hr>");
+        }
+       // abort;
+    }
+    //abort;
+    try {
+        dump(FileInfo(nested));
+    } catch(e){
+        dodump("EXPECTED ERROR:" & cfcatch.message);
     }
 
 
     d = "#scheme#://Zac";
+
+
 
     writeLog("-----------------------DirectoryCreate");
     doDump(var="DirectoryCreate #d#");
@@ -215,7 +230,5 @@
         throw "DirectoryList (should be empty)"
         */
 }
-dump(session);
-dump(request);
-dump(application);
+dump(getVariable(scheme));
 </cfscript>

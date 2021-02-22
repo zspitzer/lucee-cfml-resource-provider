@@ -9,7 +9,7 @@ component extends="vfsBase" {
     }
 
     public void function add(required any resource){
-        logger(text="VFSstorage ADD #arguments.resource.path#");
+        //logger(text="VFSstorage ADD #arguments.resource.path#");
 
         arguments.resource.setExists(true);
         arguments.resource.name = listLast(arguments.resource.path,"/\");
@@ -17,24 +17,25 @@ component extends="vfsBase" {
 
         //logger("vfsStorage add:  [#arguments.resource.path# dir:#arguments.resource.isDir# exists:#arguments.resource.exists()#]");
 
-        this.storage.set(arguments.resource.path,{
+        this.storage.set(arguments.resource,{
             meta: arguments.resource.toStruct()
         });
     }
 
     public void function update(required any resource, required any file){
-        logger(text="vfsStorage update #arguments.resource.path#");
+        //logger(text="vfsStorage update #arguments.resource.path#");
         arguments.resource.setLastModified();
-        arguments.resource._length = len(arguments.file);
-        this.storage.set(arguments.resource.path, {
+        arguments.resource.size = len(arguments.file);
+        this.storage.set(arguments.resource, {
             meta: arguments.resource.toStruct(),
             file: arguments.file
         });
     }
 
-    public void function remove(required string path){
-        if (arguments.path neq this.separator) // don't delete the root (other providers like ram:// throw an error)
-            this.storage.delete(arguments.path);
+    public void function remove(required any resource, boolean recursive=false){
+        //logger(text="vfsStorage REMOVE #arguments.resource.path# #arguments.recursive#");
+        if (arguments.resource.path neq this.separator) // don't delete the root (other providers like ram:// throw an error)
+            this.storage.delete(arguments.resource, arguments.recursive);
     }
 
     public any function read(required string path){
@@ -52,7 +53,7 @@ component extends="vfsBase" {
     }
 
     public any function readBinary(required string path){
-        var res = this.storage.get(arguments.path);
+        var res = this.storage.getBinary(arguments.path);
         if (structCount(res) eq 0){
             throw "[#arguments.path#] doesn't exist";
         } else {
@@ -68,6 +69,10 @@ component extends="vfsBase" {
         return this.storage.count();
     }
 
+    public numeric function usesFolders(){
+        return this.storage.usesFolders();
+    }
+
     public array function list(required any resource, boolean recurse=false, boolean anyMatch=false) localmode=true{
         local._path = arguments.resource.path;
         /* TODO check if last char is /, if not add, to avoid false matches with similiar file names
@@ -77,31 +82,42 @@ component extends="vfsBase" {
         local._len = len(arguments.resource.path);
         local._depth = listLen(_path, this.separator);
         local.resources = [];
+        local.files = this.storage.all(path=local._path, recurse=arguments.recurse);  //arguments.recurse  TODO
 
-       // logger(text="vfsStorage #_path# listResources [#structKeyList(this.storage.all())#]");
+//        dump(local.files); abort;
 
-        //TODO use this.storage.isFlat() ... i.e. folder based different response, need to recurse manually
+        //logger(text="vfsStorage listResources(path:#_path#,recurse:#arguments.recurse#) [#structKeyList(local.files)#]");
 
-        loop collection="#this.storage.all()#" index="local.index" item="local.file"{
+        //TODO use this.storage.usesFolders() ... i.e. folder based different response, need to recurse manually
+
+        loop collection="#local.files#" index="local.index" item="local.file"{
 
             local.res = local.file.meta;
-            local.fileParentPath = mid(res.path, 1, _len);
+            local.fileFolderPath = mid(local.res.path, 1, local._len);
+            if (local.res.isDir)
+                local.fullPath = res.path;
+            else
+                local.fullPath = res.path & res.name;
 
-            if (fileParentPath eq _path
-                    && res.path neq _path ){ // ignore itself!
-                if (arguments.recurse || res.depth == _depth){
-                    arrayAppend(resources, new vfsDebugWrapper(
-                        new vfsFile(this.scheme, this.provider, this, res.path, res),
-                        "vfsFile"
-                    ));
+            local.match = false;
+
+            if (local.fileFolderPath eq _path
+                    && local.fullPath neq _path ){ // ignore itself!
+                if (res.depth == _depth || arguments.recurse){
+                    arrayAppend(resources,// new vfsDebugWrapper(
+                        new vfsFile(this.scheme, this.provider, this, res.path, res, true)//,"vfsFile")
+                    );
+
                     if (arguments.anyMatch)
                         return resources; // sort circuit when checking for children when deleting, one match is enough
+                    local.match = true;
                 }
-            } else {
-                //logger(text="NO MATCH: [#resource.path# vs #_path#] listResources [#res.path# vs #local.fileParentPath#] (#_depth# vs #res.depth#)");
             }
+            //logger(text="resource #local.match# folder:[#fileFolderPath# eq #_path#] path [#fullPath# neq #_path#] depth [#res.depth# == #_depth#] ");
         }
-       // logger(text="vfsStorage #_path# listResources [#structCount(this.storage.all())#] returned #arrayLen(resources)# resources");
+        //logger(text="vfsStorage #_path# listResources [#structCount(local.files)#] returned [#arrayLen(resources)#] resources");
+        //logger("<hr>");
+        //dump(CallStackGet("string"));
         return resources;
     }
 

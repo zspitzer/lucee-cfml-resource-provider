@@ -1,5 +1,5 @@
 component accessors=false extends="vfsBase" {
-    public any function init(required string scheme, required any provider, required any storage, required string filePath, struct meta={}){
+    public any function init(required string scheme, required any provider, required any storage, required string filePath, struct meta={}, boolean dummy=false){
         this.separator = "/";
         this.scheme = arguments.scheme;
         this.storage = arguments.storage;
@@ -8,8 +8,8 @@ component accessors=false extends="vfsBase" {
         } else {
             this.isDir = false;
             this._exists = false;
-            this._lastModified = "";
-            this._length = 0;
+            this.dateLastModified = "";
+            this.size = 0;
             this.path = arguments.filePath;
             this.depth = listLen(this.path, this.separator)-1;
             if (this.depth < 0)
@@ -18,7 +18,8 @@ component accessors=false extends="vfsBase" {
         }
 
         variables.provider = arguments.provider;
-        logger(text="create #arguments.filePath#");
+        if (!arguments.dummy)
+            logger(text="create #arguments.filePath#");
     }
 
     public any function getStorage(){
@@ -46,7 +47,7 @@ component accessors=false extends="vfsBase" {
     }
 
     public boolean function length(){
-        return this._length;
+        return this.size;
     }
 
     function setBinary(byteArray){
@@ -62,12 +63,12 @@ component accessors=false extends="vfsBase" {
     }
 
     boolean function setLastModified(required lastModified=now()){
-        this._LastModified = arguments.lastModified;
+        this.dateLastModified = arguments.lastModified;
         return true;
     }
 
     function LastModified(){
-        return this._LastModified;
+        return this.dateLastModified;
     }
 
     public boolean function isAbsolute(){
@@ -130,9 +131,9 @@ component accessors=false extends="vfsBase" {
             name: this.name,
             path: this.path,
             depth: this.depth,
-            _lastModified: this._lastModified,
+            dateLastModified: this.dateLastModified,
             isDir: this.isDir,
-            _length: this._length,
+            size: this.size,
             _exists: this._exists
         };
     }

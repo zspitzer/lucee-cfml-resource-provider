@@ -15,8 +15,8 @@ component extends="vfsBase" {
         return structKeyExists(this.store, arguments.path);
     }
 
-    function set(string path, any data){
-        this.store[arguments.path] = arguments.data;
+    function set(any resource, any data){
+        this.store[arguments.resource.path] = arguments.data;
     }
 
     function get(string path){
@@ -24,8 +24,12 @@ component extends="vfsBase" {
         return structFind(this.store, arguments.path, {});
     }
 
-    function delete(string path){
-        return structDelete(this.store, arguments.path);
+    function getBinary(string path){
+        return structFind(this.store, arguments.path, {});
+    }
+
+    function delete(any resource){
+        return structDelete(this.store, arguments.resource.path);
     }
 
     function all(string path){ // a folder based store could use path

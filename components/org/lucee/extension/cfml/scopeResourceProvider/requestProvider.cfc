@@ -48,14 +48,17 @@ component /*implements="resourceProvider" */ extends="vfsBase" {
             pc = local.parentPC;
         switch (this.cfg.scope){
             case "session":
+                throw "not yet supprted, see https://luceeserver.atlassian.net/browse/LDEV-3292";
                 scope = session;
                 writeLog(text="sessionId: [#scope.sessionid#]");
                 break;
             case "application":
+                throw "not yet supprted, see https://luceeserver.atlassian.net/browse/LDEV-3292";
                 scope = application;
                 writeLog(text="applicationName: [#scope.applicationName#]");
                 break;
             case "request":
+                throw "not yet supprted, see https://luceeserver.atlassian.net/browse/LDEV-3292";
                 scope = request;
                 break;
             case "server":
