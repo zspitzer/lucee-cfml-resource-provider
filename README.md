@@ -47,25 +47,27 @@ Currently up and running, now in an early BETA state, see `test.cfm`.
 
 You can either specifiy a `scope` or path to a `storageCFC` which implements the `vfsStore.cfc` interfaces
 
-i.e. scope
+#### Scope Based
 
 `<resource-provider arguments="lock-timeout:10000;scope:server" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="server"/>`
 
 Using scopes doesn't work yet due to this bug https://luceeserver.atlassian.net/browse/LDEV-3292
 
-<resource-provider arguments="lock-timeout:10000;scope:request" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="request"/>
-<resource-provider arguments="lock-timeout:10000;scope:application" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="application"/>
-<resource-provider arguments="lock-timeout:10000;scope:session" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="session"/>`
+`<resource-provider arguments="lock-timeout:10000;scope:request" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="request"/>`
 
-i.e. storageCFC
+`<resource-provider arguments="lock-timeout:10000;scope:application" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="application"/>`
 
-`<resource-provider arguments="lock-timeout:10000;scope:server;storageCFC:vfsStoreFileSystem" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="temp"/>`
+`<resource-provider arguments="lock-timeout:10000;scope:session" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="session"/>`
 
-you can pass in a custom dir as an argument to `vfsStoreFileSystem`, otherwise, it defaults to `dir:#getTempDirectory()#` (not sure about the syntax with windows paths??)
+#### storageCFC
 
 `<resource-provider arguments="lock-timeout:10000;scope:server;storageCFC:vfsStoreFileSystem" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="temp"/>`
 
-Provider "temp://" which maps to your temp dir
+You can pass in a custom dir as an argument to `vfsStoreFileSystem`, otherwise, it defaults to `dir:#getTempDirectory()#` (not sure about the syntax with windows paths??)
+
+`<resource-provider arguments="lock-timeout:10000;scope:server;storageCFC:vfsStoreFileSystem" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="temp"/>`
+
+Which then enables `"temp://"` which maps to your temp dir. i.e `DirectoryList("temp://");`
 
 `<resource-provider arguments="lock-timeout:10000;storageCFC:mapped.path.to.myCoolIdea" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="myCoolIdea"/>`
 
@@ -89,9 +91,9 @@ The extension now installs, thanks @cfmitrah for pointing out the problem with t
 
 But it doesn't show up as a resource provider (yet) see `listResourceProviders.cfm`
 
-turns out cfml extension resource providers don't get installed (yet) https://luceeserver.atlassian.net/browse/LDEV-3286
+Turns out cfml extension resource providers don't get installed (yet) https://luceeserver.atlassian.net/browse/LDEV-3286
 
-cfml resource providers can't see the calling scopes https://luceeserver.atlassian.net/browse/LDEV-3292
+Cfml resource providers can't see the calling scopes https://luceeserver.atlassian.net/browse/LDEV-3292
 
 There are outstanding bugs relating to resources in Lucee https://luceeserver.atlassian.net/issues/?jql=labels%20%3D%20resources
 
