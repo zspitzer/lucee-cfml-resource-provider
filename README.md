@@ -8,13 +8,7 @@ Which I first proposed way back in 2009! https://www.bennadel.com/blog/1650-lear
 
 Recently I realised that Lucee supports adding Resource Providers via extensions in CFML
 
-i.e.  eventually
-
-`FileWrite("request://tempfile.png", imageObject );` only one implemented
-
-`FileWrite("session://tempfile.png", imageObject );`
-
-`FileWrite("application://tempfile.png", imageObject );`
+i.e.  eventually `FileWrite("request://tempfile.png", imageObject );` 
 
 Mailing List Discussion https://dev.lucee.org/t/experimental-cfml-based-resource-provider/7993
 
@@ -41,11 +35,15 @@ This could also be adapted/extended to do some interesting stuff like automatica
 
 Using commandbox, Run `box buildExtension.cfm` to build a .lex file, then manually upload via the admin
 
+You need to restart Lucee if you make any changes to the installed files under `\lucee-server\context\components\org\lucee\extension\cfml\scopeResourceProvider` rather than rebuilding and uploading a .lex file each time.
+
 ### Status
 
-**You need to manually add the following line to `lucee-server.xml` in the `resources` section**
+Currently up and running, now in an early BETA state, see `test.cfm`. 
 
-#### Storage Options
+**You need to manually add the Configuration to `lucee-server.xml` in the `resources` section**
+
+### Configation / Storage Options
 
 You can either specifiy a `scope` or path to a `storageCFC` which implements the `vfsStore.cfc` interfaces
 
@@ -63,14 +61,13 @@ i.e. storageCFC
 
 `<resource-provider arguments="lock-timeout:10000;scope:server;storageCFC:vfsStoreFileSystem" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="temp"/>`
 
-you can pass in a custom dir as an argument to `vfsStoreFileSystem`, otherwise, it defaults to `dir:#getTempDirectory()#`
+you can pass in a custom dir as an argument to `vfsStoreFileSystem`, otherwise, it defaults to `dir:#getTempDirectory()#` (not sure about the syntax with windows paths??)
 
-`<resource-provider arguments="lock-timeout:10000;scope:server;storageCFC:vfsStoreFileSystem;dir:\temp\demo" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="temp"/>`
+`<resource-provider arguments="lock-timeout:10000;scope:server;storageCFC:vfsStoreFileSystem" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="temp"/>`
+
+Provider "temp://" which maps to your temp dir
+
 `<resource-provider arguments="lock-timeout:10000;storageCFC:mapped.path.to.myCoolIdea" component="org.lucee.extension.cfml.scopeResourceProvider.requestProvider" scheme="myCoolIdea"/>`
-
-Currently up and running, now in a BETA state, see `test.cfm`. 
-
-You need to restart Lucee if you make any changes to the installed files under `\lucee-server\context\components\org\lucee\extension\cfml\scopeResourceProvider` rather than rebuilding and uploading a .lex file each time.
 
 ### Performance
 
@@ -84,7 +81,7 @@ At the moment, I am using `onMissingMethod` to see just which methods need to be
 
 https://github.com/zspitzer/lucee-cfml-resource-provider/blob/master/components/org/lucee/extension/cfml/scopeResourceProvider/vfsDebugWrapper.cfc#L14
 
-All the resource provider calls are logged out to `application.log` for debugging, there is a `variables.debug=boolean` in the various cfcs
+All the resource provider calls are logged out to `application.log` for debugging, there is a `variables.debug=boolean` in 'vfsBase.cfc`
 
 ### Bugs
 
