@@ -7,6 +7,7 @@
     dumpEnabled = dump;
 
 
+
     /*
     pc = getPageContext();
     pc.requestScope().vfs=1;
@@ -113,6 +114,13 @@
 
     FileWrite(f, txt);
 
+    writelog("-----------------------------FileRead");
+    c = FileRead(f);
+    doDump(var=c, label="fileRead #f#");
+
+    if (c neq txt)
+        throw "fileRead returned [#c#] not [#txt#]";
+
     // get the file resource
     res = fileOpen(f);
     doDump(var=res.getResource().getClass(),expand='false', label="open file, get Resource");
@@ -121,12 +129,6 @@
     FileClose(res);
 
     doDump(var=isImageFile(f), label="isImageFile #f#");
-    writelog("-----------------------------FileRead");
-    c = FileRead(f);
-    doDump(var=c, label="fileRead #f#");
-
-    if (c neq txt)
-        throw "fileRead returned [#c#] not [#txt#]";
 
     writelog("-----------------------------FileInfo");
     i = FileInfo(f);

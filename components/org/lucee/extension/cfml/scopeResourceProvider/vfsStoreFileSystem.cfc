@@ -32,12 +32,16 @@ component extends="vfsBase" {
             if (!DirectoryExists(p))
                 DirectoryCreate(p);
         } else {
-            fileWrite(p, ""); // ignore data
+            if (structKeyExists(arguments.data, "file"))
+                fileWrite(p, arguments.data.file);
+            else
+                fileWrite(p, ""); // ignore data, create an empty file
         }
     }
 
     function get(string path){
         var p = getPath(arguments.path);
+        //logger("get:" & p);
         if (!exists(p)){
             if (DirectoryExists(p)){
                 var st = {
