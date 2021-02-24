@@ -11,6 +11,7 @@ component accessors=false extends="vfsBase" {
             this.dateLastModified = "";
             this.size = 0;
             this.path = arguments.filePath;
+            // TODO depth is only needed for non folder based storage
             this.depth = listLen(this.path, this.separator)-1;
             if (this.depth < 0)
                 this.depth = 0;
@@ -135,6 +136,14 @@ component accessors=false extends="vfsBase" {
             size: this.size,
             _exists: this._exists
         };
+    }
+
+    public function getOutputStream(boolean append){
+        return this.storage.getOutputStream(this.path, arguments.append);
+    }
+
+    public function getInputStream(){
+        return this.storage.getInputStream(this.path);
     }
 
 }

@@ -44,7 +44,7 @@ component extends="vfsBase" {
             res.meta = {};
             //throw "[#arguments.path#] doesn't exist";
         } else {
-            logger("vfsStorage read:  [#res.meta.path# dir:#res.meta.isDir# exists:#res.meta._exists#]");
+           // logger("vfsStorage read:  [#res.meta.path# dir:#res.meta.isDir# exists:#res.meta._exists#]");
         }
         if (variables.debug){
             return new vfsDebugWrapper(
@@ -79,49 +79,54 @@ component extends="vfsBase" {
 
     public array function list(required any resource, boolean recurse=false, boolean anyMatch=false) localmode=true{
         local._path = arguments.resource.path;
-        /* TODO check if last char is /, if not add, to avoid false matches with similiar file names
-        if (right(local._path,1) neq this.separator)
-            local._path = local._path;// & this.separator;
-        */
-        local._len = len(arguments.resource.path);
-        local._depth = listLen(_path, this.separator);
         local.resources = [];
-        local.files = this.storage.all(path=local._path, recurse=arguments.recurse);  //arguments.recurse  TODO
-
-//        dump(local.files); abort;
+        local.files = this.storage.all(path=local._path, recurse=arguments.recurse);
 
         //logger(text="vfsStorage listResources(path:#_path#,recurse:#arguments.recurse#) [#structKeyList(local.files)#]");
 
-        //TODO use this.storage.usesFolders() ... i.e. folder based different response, need to recurse manually
+        if (this.storage.usesFolders()){
+            // folder based different response, no need need to recurse manually
+            loop collection="#local.files#" index="local.index" item="local.file" {
+                arrayAppend(resources,// new vfsDebugWrapper(
+                    new vfsFile(this.scheme, this.provider, this, local.file.meta.path, local.file.meta, true)//,"vfsFile")
+                );
 
-        loop collection="#local.files#" index="local.index" item="local.file"{
-
-            local.res = local.file.meta;
-            local.fileFolderPath = mid(local.res.path, 1, local._len);
-            if (local.res.isDir)
-                local.fullPath = res.path;
-            else
-                local.fullPath = res.path & res.name;
-
-            local.match = false;
-
-            if (local.fileFolderPath eq _path
-                    && local.fullPath neq _path ){ // ignore itself!
-                if (res.depth == _depth || arguments.recurse){
-                    arrayAppend(resources,// new vfsDebugWrapper(
-                        new vfsFile(this.scheme, this.provider, this, res.path, res, true)//,"vfsFile")
-                    );
-
-                    if (arguments.anyMatch)
-                        return resources; // sort circuit when checking for children when deleting, one match is enough
-                    local.match = true;
-                }
+                if (arguments.anyMatch)
+                    return resources; // sort circuit when checking for children when deleting, one match is enough
+               // logger(text="Listresource :[#local.file.meta.path#] #local.file.meta.name# #local.file.meta.isdir#");
             }
-            //logger(text="resource #local.match# folder:[#fileFolderPath# eq #_path#] path [#fullPath# neq #_path#] depth [#res.depth# == #_depth#] ");
+        } else {
+            // flat file system, i.e a stuct, need to filter
+            local._len = len(arguments.resource.path);
+            local._depth = listLen(_path, this.separator);
+
+            loop collection="#local.files#" index="local.index" item="local.file"{
+
+                local.res = local.file.meta;
+                local.fileFolderPath = mid(local.res.path, 1, local._len);
+                if (local.res.isDir)
+                    local.fullPath = res.path;
+                else
+                    local.fullPath = res.path & res.name;
+
+                //local.match = false;
+                if (res.depth == _depth || arguments.recurse){ // use folder depth for performance, quicker than string matching
+                    if (local.fileFolderPath eq _path
+                        && local.fullPath neq _path ){ // ignore itself!
+
+                        arrayAppend(resources,// new vfsDebugWrapper(
+                            new vfsFile(this.scheme, this.provider, this, res.path, res, true)//,"vfsFile")
+                        );
+
+                        if (arguments.anyMatch)
+                            return resources; // sort circuit when checking for children when deleting, one match is enough
+                        //local.match = true;
+                    }
+                }
+                //logger(text="resource #local.match# folder:[#fileFolderPath# eq #_path#] path [#fullPath# neq #_path#] depth [#res.depth# == #_depth#] ");
+            }
         }
         //logger(text="vfsStorage #_path# listResources [#structCount(local.files)#] returned [#arrayLen(resources)#] resources");
-        //logger("<hr>");
-        //dump(CallStackGet("string"));
         return resources;
     }
 
@@ -150,6 +155,16 @@ component extends="vfsBase" {
         arguments.resource.setLastModified();
         //logger("vfsStorage createDirectoryEntry:  [#arguments.resource.path# dir:#arguments.resource.isDir# exists:#arguments.resource.exists()#, #arguments.resource._exists#]");
         add(arguments.resource);
+    }
+
+    public function getOutputStream(boolean append){
+        //logger("getOutputStream" & "[#this.path#]");
+        return this.storage.getOutputStream(this.path, arguments.append);
+    }
+
+    public function getInputStream(){
+        //logger("getInputStream" & "[#this.path#]");
+        return this.storage.getInputStream(this.path);
     }
 
 }

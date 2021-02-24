@@ -18,6 +18,7 @@ component {
     }
 
     private function normalizePath(required string _path){
+        //logger(_path);
         return this.separator & ArrayToList(listToArray(arguments._path,"/\"), this.separator);
     }
 }

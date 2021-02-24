@@ -32,7 +32,7 @@ component extends="vfsBase" {
         return structDelete(this.store, arguments.resource.path);
     }
 
-    function all(string path){ // a folder based store could use path
+    function all(string path){ // vfsStorage providers filtering, path is ignored
         return this.store;
     }
 
@@ -46,5 +46,22 @@ component extends="vfsBase" {
 
     function usesFolders(){
         return false;
+    }
+
+    // https://github.com/lucee/Lucee/blob/6.0/core/src/main/java/lucee/commons/io/res/type/cfml/CFMLResource.java#L177
+    // TODO not working yet, needed for DirectoryCopy, this is for files, needs to be adapted
+
+    function getOutputStream(required string path, boolean append){
+        throw "to be implemented";
+        return CreateObject("java", "java.io.ObjectOutputStream").init(
+            return CreateObject("java", "java.io.FileOutputStream").init(arguments.path, arguments.append);
+        );
+    }
+
+    function getInputStream(required string path){
+        throw "to be implemented";
+        return CreateObject("java", "java.io.ObjectInputStream").init(
+          return  CreateObject("java", "java.io.FileInputStream").init(arguments.path);
+        );
     }
 }

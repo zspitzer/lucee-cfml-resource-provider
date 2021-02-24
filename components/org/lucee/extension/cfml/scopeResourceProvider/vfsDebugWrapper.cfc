@@ -48,7 +48,9 @@ component extends="vfsBase" hint="wraps a cfc, logs all function calls with args
                 updateProperties(true, true);
             } catch (e){
                 // log how function was called before it errored
-                //writeLog(text="CALLING #variables.path# #arguments.name#(#_args#)");
+                writeLog(text="ERRORED: #variables.path# #arguments.name#(#_args#)");
+                writeLog(text="#cfcatch.message#");
+                writeLog(text="#CallStackGet('string')#");
                 rethrow;
             }
             if (!isNull(local.result)){

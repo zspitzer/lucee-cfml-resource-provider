@@ -117,6 +117,8 @@ component /*implements="resource"  accessors=true */ extends="vfsBase" {
             // recursive delete
             if (local.store.usesFolders()){
                 // then need to sort, delete deepest first
+                //local.store.remove(arguments.resource, true); // move into array for transaction??
+                /*
                 arraySort(
                     children,
                     function (e1, e2){
@@ -124,6 +126,7 @@ component /*implements="resource"  accessors=true */ extends="vfsBase" {
                     },
                     "asc"
                 );
+                */
                 local.store.remove(arguments.resource, true);
                 return;
             } else {
@@ -132,6 +135,6 @@ component /*implements="resource"  accessors=true */ extends="vfsBase" {
                 }
             }
         }
-        local.store.remove(arguments.resource);
+        local.store.remove(arguments.resource, arguments.force);
     }
 }

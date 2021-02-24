@@ -1,26 +1,29 @@
 component extends="vfsBase" {
     public any function init(struct args){
         this.args = arguments.args;
-        this.store = create();
         this.separator = this.args.separator;
         if (structKeyExists(this.args, "dir"))
             this.dir = this.args.dir;
         else
             this.dir = getTempDirectory();
+        //this.dir = "c:\temp\test";
+        this.store = create();
         return this;
     }
 
     function create(){
-        //logger(text="vfsStoreFileSystem: create file store [#this.dir#]");
+        logger(text="vfsStoreFileSystem: create file store [#this.dir#]");
         //var structType = "normal";// this.args["case-sensitive"] ? "casesensitive" : "normal"; // acf 2001
         //return structNew(structType);
     }
 
     function exists(string path){
+        logger("exists: " & arguments.path);
         var p = getPath(arguments.path);
-        if (fileExists(p))
-            return true;
+        //logger(p);
         if (DirectoryExists(p))
+            return true;
+        if (fileExists(p))
             return true;
         else
             return false;
@@ -41,46 +44,47 @@ component extends="vfsBase" {
 
     function get(string path){
         var p = getPath(arguments.path);
-        //logger("get:" & p);
-        if (!exists(p)){
-            if (DirectoryExists(p)){
-                var st = {
-                    meta: {
-                        name: listlast(arguments.path, "\/"),
-                        path: arguments.path,
-                        depth: listLen(arguments.path,"\/") + 1,
-                        dateLastModified: "",
-                        isDir: true,
-                        size: 0,
-                        _exists: true
-                    }
-                };
-            } else {
-                return {}; // doesn't exist
-            }
-        } else {
+        if (DirectoryExists(p)){
+            var st = {
+                meta: {
+                    name: listlast(arguments.path, "\/"),
+                    path: arguments.path,
+                    depth: listLen(arguments.path,"\/") + 1,
+                    dateLastModified: "",
+                    isDir: true,
+                    size: 0,
+                    _exists: true
+                }
+            };
+        } else if (fileExists(p)){
             var f = getFileInfo(p);
             var st = {
                 meta: {
                     name: f.name,
                     path: arguments.path,
                     depth: listLen(arguments.path,"\/") + 1,
-                    dateLastModified: f.dateLastModified,
+                    dateLastModified: f.LastModified,
                     isDir: (f.type == "dir"),
                     size: f.size,
                     _exists: true
                 }
             };
+        } else {
+            //logger("get: missing" & arguments.path);
+            var st =  {}; // doesn't exist
         }
         return st;
     }
 
-    function readBinary(string path){
-        return fileRead(getPath(arguments.path));
+    function getBinary(string path){
+        return {
+            file: fileRead(getPath(arguments.path))
+        };
     }
 
     function delete(required any resource, boolean recursive=false){
         var p = getPath(arguments.resource.path);
+        //logger("Delete: " & p & " [#resource.path#] recursive: #recursive# isDir: #arguments.resource.isDirectory()# #directoryExists(p)#" );
         if (arguments.resource.isDirectory())
             DirectoryDelete(p, arguments.recursive);
         else
@@ -90,8 +94,8 @@ component extends="vfsBase" {
     struct function all(string path=this.separator, boolean recurse=false) { // a folder based store could use path
         var q = DirectoryList(path=getPath(arguments.path),listinfo="query", recurse=arguments.recurse);
         var st ={};
-        var l = len(this.dir);
-        //logger("DirectoryList.all(path=#getPath(arguments.path)#, listinfo='query', recurse=#arguments.recurse#)");
+        var l = len(this.dir)+1;
+        // logger("DirectoryList.all(path=#getPath(arguments.path)#, listinfo='query', recurse=#arguments.recurse#)");
         loop query="#q#"{
             local.folder = normalizePath(mid(q.directory, l));// & this.separator; //strip off the actual dir
             //logger("DirectoryList.all file [" & this.dir & "] [" & q.directory & "] [" & local.folder & "] ");
@@ -139,7 +143,21 @@ component extends="vfsBase" {
         if (arguments.path == "/" || arguments.path == "\")
             return this.dir;
         var p = this.dir & arguments.path;
-        //logger(p);
+        // logger("zzzzz " & p & " [#arguments.path#]");
         return p;
     }
+    // https://github.com/lucee/Lucee/blob/6.0/core/src/main/java/lucee/commons/io/res/type/cfml/CFMLResource.java#L177
+    // TODO not working yet, needed for DirectoryCopy
+    function getOutputStream(required string path, boolean append){
+        return CreateObject("java", "java.io.ObjectOutputStream").init(
+            CreateObject("java", "java.io.FileOutputStream").init(arguments.path, arguments.append)
+        );
+    }
+
+    function getInputStream(required string path){
+        return CreateObject("java", "java.io.ObjectInputStream").init(
+            CreateObject("java", "java.io.FileInputStream").init(arguments.path)
+        );
+    }
+
 }
