@@ -37,11 +37,17 @@ Using commandbox, Run `box buildExtension.cfm` to build a .lex file, then manual
 
 You need to restart Lucee if you make any changes to the installed files under `\lucee-server\context\components\org\lucee\extension\cfml\scopeResourceProvider` rather than rebuilding and uploading a .lex file each time.
 
+### Tests
+
+Using Testbox, see the `/tests` folder
+
 ### Status
 
 Currently up and running, now in an early BETA state, see `test.cfm`. 
 
 **You need to manually add the Configuration to `lucee-server.xml` in the `resources` section**
+
+Pretty much all working except for the file input and output streams, which is need for `DirectoryCopy()`
 
 ### Configation / Storage Options
 
@@ -101,10 +107,12 @@ There are outstanding bugs relating to resources in Lucee https://luceeserver.at
 
 Init args passed to a cfml resource provider are a java hashmap https://luceeserver.atlassian.net/browse/LDEV-3291
 
+`DirectoryCopy()` only throws a mysterious ApplicationException, without cause https://luceeserver.atlassian.net/browse/LDEV-3299
+
 ### Todo
 
 - more testing
-- move test.cfm over to testbox.
+- get fileinput and output streams working
 
 ### See also
 
