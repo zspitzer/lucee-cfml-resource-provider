@@ -5,7 +5,6 @@ component extends="testbox.system.BaseSpec"{
 				var root = "#scheme#files-and-dirs\";
 
 				it("setup(#root#)", function(){
-					dump(root);
 					if (DirectoryExists(root))
 						expect( DirectoryDelete(root, true) ).toBeNull();
 					expect( DirectoryExists(root) ).toBe( false );
@@ -22,7 +21,7 @@ component extends="testbox.system.BaseSpec"{
 					expect(DirectoryList(path=root,listinfo="query",recurse=true).recordcount).toBe(12);
 
 
-					expect(DirectoryCopy( source=root & "oz/", destination=root & "\au", recurse=true, createPath=true ) ).toBeNull();
+					expect(DirectoryCopy( source=root & "oz/", destination=root & "au/", recurse=true, createPath=true, filter="*" ) ).toBeNull();
 
 					if (DirectoryExists(root))
 						expect(DirectoryDelete(root, true)).toBeNull();

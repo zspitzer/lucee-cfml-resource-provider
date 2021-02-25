@@ -1,6 +1,7 @@
 component /*implements="resourceProvider" */ extends="vfsBase" {
 
     public any function init(string scheme, struct cfg){
+        arguments.cfg["usestreams"] = false; // cheeky
         this.cfg = {
             "case-sensitive": false,
             scheme: arguments.scheme,

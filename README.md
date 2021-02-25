@@ -8,7 +8,7 @@ Which I first proposed way back in 2009! https://www.bennadel.com/blog/1650-lear
 
 Recently I realised that Lucee supports adding Resource Providers via extensions in CFML
 
-i.e.  eventually `FileWrite("request://tempfile.png", imageObject );` 
+i.e.  eventually `FileWrite("request://tempfile.png", imageObject );`
 
 Mailing List Discussion https://dev.lucee.org/t/experimental-cfml-based-resource-provider/7993
 
@@ -43,7 +43,7 @@ Using Testbox, see the `/tests` folder
 
 ### Status
 
-Currently up and running, now in an early BETA state, see `test.cfm`. 
+Currently up and running, now in an early BETA state, see `test.cfm`.
 
 **You need to manually add the Configuration to `lucee-server.xml` in the `resources` section**
 
@@ -81,7 +81,7 @@ Which then enables `"temp://"` which maps to your temp dir. i.e `DirectoryList("
 
 You can benchmark against the built in `ram://` VFS drive by calling `test.cfm?scheme=ram&dump=true`
 
-This cfml resource provider is **about 75% as fast as the built in ram drive**. 
+This cfml resource provider is **about 75% as fast as the built in ram drive**.
 
 Ram drives return more metadata to `DirectoryList` which makes the `test.cfm` run slower, you can disable the dumps in `test.cfm` with `?dump=false`
 
@@ -90,6 +90,12 @@ At the moment, I am using `onMissingMethod` to see just which methods need to be
 https://github.com/zspitzer/lucee-cfml-resource-provider/blob/master/components/org/lucee/extension/cfml/scopeResourceProvider/vfsDebugWrapper.cfc#L14
 
 All the resource provider calls are logged out to `application.log` for debugging, there is a `variables.debug=boolean` in 'vfsBase.cfc`
+
+### Example
+
+Ben Nadel had a problem with the performance for `<cfimport>` on Mac Docker
+
+https://dev.lucee.org/t/cfmodule-vs-cfimport-radically-different-performance/7999/32?u=zac_spitzer
 
 ### Bugs
 
@@ -107,7 +113,7 @@ There are outstanding bugs relating to resources in Lucee https://luceeserver.at
 
 Init args passed to a cfml resource provider are a java hashmap https://luceeserver.atlassian.net/browse/LDEV-3291
 
-`DirectoryCopy()` only throws a mysterious ApplicationException, without cause https://luceeserver.atlassian.net/browse/LDEV-3299
+`DirectoryCopy()` only throws a mysterious ApplicationException, without cause https://luceeserver.atlassian.net/browse/LDEV-3299  (needed a filter="*" to work)
 
 ### Todo
 

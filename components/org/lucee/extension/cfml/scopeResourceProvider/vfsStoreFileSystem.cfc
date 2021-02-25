@@ -6,13 +6,12 @@ component extends="vfsBase" {
             this.dir = this.args.dir;
         else
             this.dir = getTempDirectory();
-        //this.dir = "c:\temp\test";
         this.store = create();
         return this;
     }
 
     function create(){
-        logger(text="vfsStoreFileSystem: create file store [#this.dir#]");
+        //logger(text="vfsStoreFileSystem: create file store [#this.dir#]");
         //var structType = "normal";// this.args["case-sensitive"] ? "casesensitive" : "normal"; // acf 2001
         //return structNew(structType);
     }
@@ -70,7 +69,7 @@ component extends="vfsBase" {
                 }
             };
         } else {
-            //logger("get: missing" & arguments.path);
+            logger("get: missing" & arguments.path);
             var st =  {}; // doesn't exist
         }
         return st;
@@ -149,7 +148,7 @@ component extends="vfsBase" {
     // https://github.com/lucee/Lucee/blob/6.0/core/src/main/java/lucee/commons/io/res/type/cfml/CFMLResource.java#L177
     // TODO not working yet, needed for DirectoryCopy
     function getOutputStream(required string path, boolean append){
-        return CreateObject("java", "java.io.ObjectOutputStream").init(
+        return CreateObject("java", "java.io.ByteArrayOutputStream").init(
             CreateObject("java", "java.io.FileOutputStream").init(arguments.path, arguments.append)
         );
     }

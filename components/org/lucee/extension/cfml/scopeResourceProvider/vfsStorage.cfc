@@ -157,14 +157,14 @@ component extends="vfsBase" {
         add(arguments.resource);
     }
 
-    public function getOutputStream(boolean append){
-        //logger("getOutputStream" & "[#this.path#]");
-        return this.storage.getOutputStream(this.path, arguments.append);
+    public function getOutputStream(required string path, boolean append){
+        //logger("getOutputStream" & "[#arguments.path#]");
+        return this.storage.getOutputStream(arguments.path, arguments.append);
     }
 
     public function getInputStream(){
-        //logger("getInputStream" & "[#this.path#]");
-        return this.storage.getInputStream(this.path);
+        //logger("getInputStream" & "[#arguments.path#]");
+        return this.storage.getInputStream(arguments.path);
     }
 
 }
