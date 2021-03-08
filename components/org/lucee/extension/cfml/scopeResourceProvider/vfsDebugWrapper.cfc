@@ -43,6 +43,7 @@ component extends="vfsBase" hint="wraps a cfc, logs all function calls with args
         if (isCustomFunction(variables.obj[arguments.name])){
             try {
                 writeLog(text="CALLING #variables.path# #arguments.name#(#_args#)");
+                // writeLog(text="#CallStackGet('string')#");
                 updateProperties(true, false);
                 local.result = invoke(variables.obj, arguments.name, arguments.args);
                 updateProperties(true, true);

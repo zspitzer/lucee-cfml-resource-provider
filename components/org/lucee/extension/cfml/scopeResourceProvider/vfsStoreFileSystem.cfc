@@ -6,7 +6,7 @@ component extends="vfsBase" {
             this.dir = this.args.dir;
         else
             this.dir = getTempDirectory();
-        this.store = create();
+        // this.store = create();
         return this;
     }
 
@@ -16,16 +16,15 @@ component extends="vfsBase" {
         //return structNew(structType);
     }
 
-    function exists(string path){
-        logger("exists: " & arguments.path);
+    function exists(string path, boolean asType = false){
         var p = getPath(arguments.path);
-        //logger(p);
-        if (DirectoryExists(p))
-            return true;
+        //logger("exists:" & p & " " & arguments.path);
         if (fileExists(p))
-            return true;
+            return arguments.asType ? "file" : true;
+        if (DirectoryExists(p))
+            return arguments.asType ? "dir" : true;
         else
-            return false;
+            return arguments.asType ? "" : true;
     }
 
     function set(any resource, any data){
@@ -43,34 +42,41 @@ component extends="vfsBase" {
 
     function get(string path){
         var p = getPath(arguments.path);
-        if (DirectoryExists(p)){
-            var st = {
-                meta: {
-                    name: listlast(arguments.path, "\/"),
-                    path: arguments.path,
-                    depth: listLen(arguments.path,"\/") + 1,
-                    dateLastModified: "",
-                    isDir: true,
-                    size: 0,
-                    _exists: true
-                }
-            };
-        } else if (fileExists(p)){
+        var e = exists(arguments.path, true);
+        //logger("get:" & e);
+        switch (e){
+            case "dir":
+                var st = {
+                    meta: {
+                        name: listlast(arguments.path, "\/"),
+                        path: arguments.path,
+                        depth: listLen(arguments.path,"\/") + 1,
+                        dateLastModified: createDate(1970, 1, 1), // needs directoryInfo()
+                        isDir: true,
+                        size: 0,
+                        _exists: true
+                    }
+                };
+                break;
+            case "file":
             var f = getFileInfo(p);
+                logger(f.toJson());
             var st = {
                 meta: {
                     name: f.name,
                     path: arguments.path,
                     depth: listLen(arguments.path,"\/") + 1,
-                    dateLastModified: f.LastModified,
-                    isDir: (f.type == "dir"),
+                        dateLastModified: f.LastModified,
+                        isDir: false,
                     size: f.size,
                     _exists: true
                 }
             };
-        } else {
-            logger("get: missing" & arguments.path);
-            var st =  {}; // doesn't exist
+                break;
+            default:
+                //logger("get: missing" & arguments.path);
+                var st = {};
+                break;
         }
         return st;
     }

@@ -1,4 +1,4 @@
-component accessors=false extends="vfsBase" {
+component extends="vfsBase" {
     public any function init(required string scheme, required any provider, required any storage, required string filePath, struct meta={}, boolean dummy=false){
         this.separator = "/";
         this.scheme = arguments.scheme;
@@ -59,7 +59,7 @@ component accessors=false extends="vfsBase" {
     }
 
     function getBinary(){
-        return this.storage.readBinary(this.path);
+        return this.storage.getBinary(this.path);
     }
 
     boolean function setLastModified(required lastModified=now()){

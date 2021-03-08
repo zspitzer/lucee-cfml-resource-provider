@@ -56,7 +56,7 @@ component extends="vfsBase" {
         }
     }
 
-    public any function readBinary(required string path){
+    public any function getBinary(required string path){
         var res = this.storage.getBinary(arguments.path);
         if (structCount(res) eq 0){
             throw "[#arguments.path#] doesn't exist";
@@ -100,7 +100,7 @@ component extends="vfsBase" {
             local._len = len(arguments.resource.path);
             local._depth = listLen(_path, this.separator);
 
-            loop collection="#local.files#" index="local.index" item="local.file"{
+            loop collection="#local.files#" index="local.index" item="local.file" {
 
                 local.res = local.file.meta;
                 local.fileFolderPath = mid(local.res.path, 1, local._len);
@@ -112,8 +112,7 @@ component extends="vfsBase" {
                 //local.match = false;
                 if (res.depth == _depth || arguments.recurse){ // use folder depth for performance, quicker than string matching
                     if (local.fileFolderPath eq _path
-                        && local.fullPath neq _path ){ // ignore itself!
-
+                            && local.fullPath neq _path ){ // ignore itself!
                         arrayAppend(resources,// new vfsDebugWrapper(
                             new vfsFile(this.scheme, this.provider, this, res.path, res, true)//,"vfsFile")
                         );
@@ -122,6 +121,7 @@ component extends="vfsBase" {
                             return resources; // sort circuit when checking for children when deleting, one match is enough
                         //local.match = true;
                     }
+                    //logger(text="resource #local.match# folder:[#fileFolderPath# eq #_path#] path [#fullPath# neq #_path#] depth [#res.depth# == #_depth#] ");
                 }
                 //logger(text="resource #local.match# folder:[#fileFolderPath# eq #_path#] path [#fullPath# neq #_path#] depth [#res.depth# == #_depth#] ");
             }
